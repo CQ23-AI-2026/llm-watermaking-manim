@@ -22,9 +22,43 @@ LLM Watermarking Manim is a mathematical animation project visualizing watermark
 
 ## How to run
 
+
 1. Install manim:
-   pip install manim
+    ```
+    pip install manim
+    ```
 2. Render a part (example):
-   PYTHONPATH=. manim -pql scenes/part1.py Part1
+    - **macOS/Linux:**
+       ```
+       PYTHONPATH=. manim -pql scenes/part1.py Part1
+       ```
+    - **Windows (PowerShell):**
+       ```
+       $env:PYTHONPATH="."; manim -pql scenes/part1.py Part1
+       ```
+
+### Render in 1080p or 2K
+
+To render in higher resolution, use one of the following commands:
+
+- **1080p (high quality):**
+   - macOS/Linux:
+      ```
+      PYTHONPATH=. manim -pqh scenes/part1.py Part1
+      ```
+   - Windows (PowerShell):
+      ```
+      $env:PYTHONPATH="."; manim -pqh scenes/part1.py Part1
+      ```
+
+- **2K (2560x1440):**
+   - macOS/Linux:
+      ```
+      PYTHONPATH=. manim --resolution=2560,1440 scenes/part1.py Part1
+      ```
+   - Windows (PowerShell):
+      ```
+      $env:PYTHONPATH="."; manim --resolution=2560,1440 scenes/part1.py Part1
+      ```
 
 Output videos will be in `media/videos/` by default.
