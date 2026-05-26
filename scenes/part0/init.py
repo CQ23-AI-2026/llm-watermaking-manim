@@ -1,8 +1,7 @@
-from contextlib import closing
 import os
-import wave
 
 from manim import *
+from moviepy import AudioFileClip
 from config.style import (
     VGText, VG_BLUE, VG_GRAY, VG_GOLD, VG_GREEN, VG_PURPLE, VG_ORANGE,
     LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT
@@ -56,12 +55,11 @@ Bối cảnh và Động lực.
 def _get_audio_duration(path: str) -> float | None:
     if not path or not os.path.exists(path):
         return None
-    with closing(wave.open(path, "rb")) as wf:
-        frames = wf.getnframes()
-        rate = wf.getframerate()
-    if rate == 0:
+    try:
+        with AudioFileClip(path) as clip:
+            return float(clip.duration)
+    except Exception:
         return None
-    return frames / float(rate)
 
 
 class InitScene(Scene):
@@ -119,7 +117,9 @@ class InitScene(Scene):
         )
 
         # Nhúng tệp âm thanh lồng tiếng cho Cảnh 1 nếu có
-        voice_1 = os.path.join("scenes", "part0", "voice", "init", "init_1.wav")
+        voice_1 = os.path.join(
+            "scenes", "part0", "voice", "init", "init_scene_1.mp3"
+        )
         voice_1_duration = _get_audio_duration(voice_1)
         if voice_1_duration is not None:
             self.add_sound(voice_1)
@@ -164,8 +164,11 @@ class InitScene(Scene):
         ).next_to(overview_title, DOWN, buff=0.15)
 
         # Nhúng tệp âm thanh lồng tiếng cho Cảnh 1.5 nếu có
-        voice_1_5 = os.path.join("scenes", "part0", "voice", "init", "init_1_5.wav")
+        voice_1_5 = os.path.join(
+            "scenes", "part0", "voice", "init", "init_scene_15.mp3"
+        )
         voice_1_5_duration = _get_audio_duration(voice_1_5)
+        
         if voice_1_5_duration is not None:
             self.add_sound(voice_1_5)
 
@@ -253,7 +256,9 @@ class InitScene(Scene):
         ).next_to(part_title, DOWN, buff=0.25)
 
         # Nhúng tệp âm thanh lồng tiếng cho Cảnh 2 nếu có
-        voice_2 = os.path.join("scenes", "part0", "voice", "init", "init_2.wav")
+        voice_2 = os.path.join(
+            "scenes", "part0", "voice", "init", "init_scene_2.mp3"
+        )
         voice_2_duration = _get_audio_duration(voice_2)
         if voice_2_duration is not None:
             self.add_sound(voice_2)
