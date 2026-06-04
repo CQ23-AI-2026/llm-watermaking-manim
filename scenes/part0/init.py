@@ -196,7 +196,6 @@ class InitScene(Scene):
         # Nhúng tệp âm thanh lồng tiếng cho Cảnh 1.5 nếu có
         voice_1_5 = os.path.join(current_dir, "assets", "init", "init_scene_15.mp3")
         voice_1_5_duration = _get_audio_duration(voice_1_5)
-        print(f"DEBUG: voice_1_5 path = {voice_1_5}, exists = {os.path.exists(voice_1_5)}, duration = {voice_1_5_duration}")
         if voice_1_5_duration is not None:
             self.add_sound(voice_1_5)
 

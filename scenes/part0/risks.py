@@ -1,6 +1,19 @@
 import os
+import sys
+import glob
+
+# Try to find and add venv site-packages to sys.path
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+venv_dirs = [
+    os.path.join(root_dir, ".venv", "Lib", "site-packages"),
+    os.path.join(root_dir, ".venv", "lib", "python*", "site-packages"),
+]
+for path_pattern in venv_dirs:
+    for path in glob.glob(path_pattern):
+        if os.path.exists(path) and path not in sys.path:
+            sys.path.append(path)
+
 from manim import *
-from moviepy import AudioFileClip
 from config.style import (
     VGText, VG_BLUE, VG_GRAY, VG_GOLD, VG_GREEN, VG_PURPLE, VG_ORANGE, VG_RED,
     LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT
@@ -10,10 +23,23 @@ def _get_audio_duration(path: str) -> float | None:
     if not path or not os.path.exists(path):
         return None
     try:
+        from mutagen.mp3 import MP3
+        return float(MP3(path).info.length)
+    except Exception:
+        pass
+    try:
+        from moviepy.editor import AudioFileClip
         with AudioFileClip(path) as clip:
             return float(clip.duration)
     except Exception:
-        return None
+        pass
+    try:
+        from moviepy import AudioFileClip
+        with AudioFileClip(path) as clip:
+            return float(clip.duration)
+    except Exception:
+        pass
+    return None
 
 
 def create_newspaper_clip(
@@ -76,6 +102,8 @@ def create_newspaper_clip(
             logo = Text("CNBC", font="Arial", font_size=26, weight="BOLD", color="#0F1B40")
         elif logo_name.upper() == "NEWSGUARD":
             logo = Text("NewsGuard", font="Segoe UI", font_size=22, weight="BOLD", color="#27AE60")
+        elif logo_name.upper() == "THE GUARDIAN":
+            logo = Text("the guardian", font="Georgia", font_size=22, weight="BOLD", color="#005689")
         else:
             logo = Text(logo_name, font="Georgia", font_size=24, weight="BOLD", color=logo_color)
 
@@ -160,6 +188,8 @@ class RisksScene(Scene):
     """
 
     def construct(self):
+        current_dir = os.path.dirname(__file__)
+
         # Lưới nền mờ công nghệ đồng bộ
         grid = NumberPlane(
             background_line_style={
@@ -176,7 +206,7 @@ class RisksScene(Scene):
         # =========================================================================
         
         # Audio Cảnh 3
-        voice_3 = os.path.join("scenes", "part0", "voice", "risks", "scene_3.mp3")
+        voice_3 = os.path.join(current_dir, "assets", "llm_risk", "scene_3.mp3")
         voice_3_duration = _get_audio_duration(voice_3)
         if voice_3_duration is not None:
             self.add_sound(voice_3)
@@ -334,7 +364,7 @@ class RisksScene(Scene):
 
         # Tiêu đề Cảnh 4
         scene4_title = VGText(
-            "TỐC ĐỘ ĐẠT 1 TRIỆU NGƯỜI DÙNG",
+            "SỰ BÙNG NỔ NGƯỜI DÙNG",
             font_size=LARGE_FONT_SIZE - 10,
             color=VG_GOLD,
             weight=BOLD_WEIGHT,
@@ -348,7 +378,7 @@ class RisksScene(Scene):
         ).next_to(scene4_title, DOWN, buff=0.15)
 
         # Audio Cảnh 4
-        voice_4 = os.path.join("scenes", "part0", "voice", "risks", "scene_4.mp3")
+        voice_4 = os.path.join(current_dir, "assets", "llm_risk", "scene_4.mp3")
         voice_4_duration = _get_audio_duration(voice_4)
         if voice_4_duration is not None:
             self.add_sound(voice_4)
@@ -462,7 +492,7 @@ class RisksScene(Scene):
 
         # Hiệu ứng mọc các cột lần lượt
         if voice_4_duration is not None:
-            step_wait = (voice_4_duration - 5.0) / 4.0 if voice_4_duration > 5.0 else 1.0
+            step_wait = (voice_4_duration - 8.7) / 4.0 if voice_4_duration > 8.7 else 1.5
         else:
             step_wait = 1.5
 
@@ -492,7 +522,7 @@ class RisksScene(Scene):
         self.play(FadeOut(glow_box), run_time=0.3)
         
         if voice_4_duration is not None:
-            self.wait(max(0.2, voice_4_duration - (num_bars * 0.8 + 2.0)))
+            self.wait(2.0)
         else:
             self.wait(3.0)
 
@@ -516,26 +546,26 @@ class RisksScene(Scene):
             {
                 "id": "5_1",
                 "tag": "RỦI RO 01",
-                "title_vi": "TRÀN LAN TIN GIẢ",
-                "desc_vi": "Sự tràn lan của tin giả và các\ntrang web do AI tự sinh\nnhằm định hướng dư luận.",
-                "logo": "NewsGuard",
+                "title_vi": "TIN GIẢ BẦU CỬ",
+                "desc_vi": "Các chatbot AI đưa ra thông tin sai lệch\nvề quy định bỏ phiếu và ứng cử viên\ntrong cuộc bầu cử tại Scotland.",
+                "logo": "The Guardian",
                 "logo_file": "risk_1.png",
-                "sub": "Special Tech Report • 2023",
-                "headline": "AI-Generated Fake News Sites\nIncrease By Over 1,000%\nAcross The Web",
+                "sub": "Demos Election Study • 2024",
+                "headline": "ChatGPT and other AI bots made\nhuge errors before Scottish\nelection, study finds",
                 "angle": 3.0,
-                "voice_file": "scene_5_1.mp3"
+                "voice_file": "scene_51.mp3"
             },
             {
                 "id": "5_2",
                 "tag": "RỦI RO 02",
-                "title_vi": "ÁN LỆ GIẢ TRƯỚC TÒA",
+                "title_vi": "TÀI LIỆU & ÁN LỆ GIẢ",
                 "desc_vi": "Hai luật sư tại Mỹ bị phạt nặng\nvì dùng ChatGPT bào chữa và\nvô tình nộp án lệ bịa đặt hoàn toàn.",
                 "logo": "Forbes",
                 "logo_file": "risk_2.png",
                 "sub": "Law & Corporate • June 2023",
-                "headline": "Two US Lawyers Fined For Submitting\nFake ChatGPT Citations In Court\nProceedings",
+                "headline": "Judge Fines Two Lawyers For Using\nFake Cases From ChatGPT",
                 "angle": -4.0,
-                "voice_file": "scene_5_2.mp3"
+                "voice_file": "scene_52.mp3"
             },
             {
                 "id": "5_3",
@@ -545,9 +575,9 @@ class RisksScene(Scene):
                 "logo": "CNBC",
                 "logo_file": "risk_3.png",
                 "sub": "Security & Fraud • April 2023",
-                "headline": "AI Tools Generating Mammoth Increase\nIn Phishing Emails, Security Experts\nWarn Globally",
+                "headline": "AI Tools Such As ChatGPT Are\nGenerating A Mammoth Increase In\nMalicious Phishing Emails",
                 "angle": 4.0,
-                "voice_file": "scene_5_3.mp3"
+                "voice_file": "scene_53.mp3"
             },
             {
                 "id": "5_4",
@@ -557,16 +587,16 @@ class RisksScene(Scene):
                 "logo": "Forbes",
                 "logo_file": "risk_4.png",
                 "sub": "Education & Integrity • 2023",
-                "headline": "89% Of Students Admit To Using\nChatGPT For Homework & Take-Home\nExams",
+                "headline": "Educators Battle Plagiarism As 89%\nOf Students Admit To Using OpenAI's\nChatGPT For Homework",
                 "angle": -3.0,
-                "voice_file": "scene_5_4.mp3"
+                "voice_file": "scene_54.mp3"
             }
         ]
 
         # Vòng lặp chạy qua 4 slide rủi ro
         for idx, slide in enumerate(risks_slides):
             # Cấu hình âm thanh
-            voice_file_path = os.path.join("scenes", "part0", "voice", "risks", slide["voice_file"])
+            voice_file_path = os.path.join(current_dir, "assets", "llm_risk", slide["voice_file"])
             slide_duration = _get_audio_duration(voice_file_path)
             if slide_duration is not None:
                 self.add_sound(voice_file_path)
@@ -577,7 +607,7 @@ class RisksScene(Scene):
                 font_size=18,
                 color=VG_RED,
                 weight=BOLD_WEIGHT
-            ).move_to([-3.4, 2.0, 0])
+            ).move_to([-3.8, 2.0, 0])
 
             title_text = VGText(
                 slide["title_vi"],
@@ -602,19 +632,25 @@ class RisksScene(Scene):
 
             left_group = VGroup(tag_text, title_text, underline, desc_text)
 
-            # --- DỰNG TỜ BÁO VECTOR BÊN PHẢI ---
-            logo_path = None
-            if slide.get("logo_file"):
-                logo_path = os.path.join(
-                    "scenes", "part0", "assets", "llm_risk", slide["logo_file"]
-                )
-            newspaper_clip = create_newspaper_clip(
-                logo_name=slide["logo"],
-                sub_headline=slide["sub"],
-                main_headline=slide["headline"],
-                angle_degrees=slide["angle"],
-                logo_path=logo_path,
-            ).move_to([3.3, -0.2, 0])
+            # --- DỰNG HÌNH ẢNH BÁO BÊN PHẢI ---
+            img_path = os.path.join(
+                current_dir, "assets", "llm_risk", slide["logo_file"]
+            )
+            
+            if os.path.exists(img_path):
+                main_img = ImageMobject(img_path)
+                main_img.scale_to_fit_width(4.8)
+                
+                newspaper_clip = main_img
+                newspaper_clip.move_to([3.8, -0.2, 0])
+            else:
+                newspaper_clip = create_newspaper_clip(
+                    logo_name=slide["logo"],
+                    sub_headline=slide["sub"],
+                    main_headline=slide["headline"],
+                    angle_degrees=0.0, # Straight
+                    logo_path=None,
+                ).move_to([3.8, -0.2, 0])
 
             # --- HOẠT ẢNH XUẤT HIỆN ---
             # Text bên trái trượt lên nhẹ, Tờ báo trượt từ phải sang trái kèm xoay nghiêng
