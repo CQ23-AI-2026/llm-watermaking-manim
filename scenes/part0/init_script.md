@@ -22,7 +22,7 @@ mà gần như không làm thay đổi cách con người đọc và cảm nhậ
 
 ## Cảnh 1.5: Tổng quan nội dung video
 
-Trong video này, chúng ta sẽ cùng đi qua 5 phần chính.
+Trong video này, chúng ta sẽ cùng đi qua 6 phần chính.
 
 Đầu tiên là bối cảnh và động lực —
 tại sao việc nhận diện văn bản AI
@@ -37,6 +37,9 @@ kỹ thuật nhúng tín hiệu trực tiếp vào quá trình sinh văn bản c
 Ở phần tiếp theo,
 chúng ta sẽ khám phá Model Watermark,
 một hướng tiếp cận nhằm bảo vệ bản quyền và quyền sở hữu mô hình AI.
+
+Tiếp đó là Phát hiện hậu kiểm —
+các phương pháp kiểm tra văn bản sau khi đã được sinh ra.
 
 Và cuối cùng,
 là phần kết luận cùng những thách thức
