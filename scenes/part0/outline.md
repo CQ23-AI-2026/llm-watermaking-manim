@@ -33,10 +33,8 @@ Part 0: Bối cảnh & Động lực ~34 phút
 - Số người dùng LLM tăng mạnh kéo theo các hệ quả tiêu cực:
  1. **Tin giả** (Misinformation)
  2. **Bằng chứng pháp lý giả** Forbes: "Two US lawyers fined for submitting fake court citations from ChatGPT"
- 3. **Mã độc** Cyber Security News: "Hackers using ChatGPT to generate malware"
- 4. **Lừa đảo / Phishing** CNBC: "AI tools generating mammoth increase in phishing emails"
- 5. **Đạo văn** Forbes: "89% of students admit to using ChatGPT for Homework"
- 6. **Rò rỉ thông tin cá nhân** Spiceworks: "ChatGPT leaks sensitive user data"
+ 3. **Lừa đảo / Phishing** CNBC: "AI tools generating mammoth increase in phishing emails"
+ 4. **Đạo văn** Forbes: "89% of students admit to using ChatGPT for Homework"
 - Minh họa: collage các tiêu đề báo chí thật
 
 ### 0.2 Thách thức: Phân biệt AI vs. Con người
