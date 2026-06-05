@@ -22,13 +22,13 @@ def play_scene_4_5(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_1]: Đợi đọc "Tuy nhiên có một điểm mù nghiêm trọng..."
-    scene.wait(2.0)
+    scene.wait(0.5)
     # ---------------------------------------------------------
     
     # Nhãn chủ đề phụ gọn gàng ở góc trái
     subtitle_bg = Rectangle(width=6.0, height=0.5, color=VG_RED, fill_color=BLACK, fill_opacity=0.8)
     subtitle_text = VGText("Thiên kiến: Người học tiếng Anh", font_size=16, color=VG_RED, weight=BOLD_WEIGHT).move_to(subtitle_bg.get_center())
-    subtitle = VGroup(subtitle_bg, subtitle_text).to_edge(UP, buff=1.2).to_edge(LEFT, buff=0.5)
+    subtitle = VGroup(subtitle_bg, subtitle_text).to_edge(UP, buff=1.6).to_edge(LEFT, buff=0.5)
     scene.play(FadeIn(subtitle, shift=RIGHT), run_time=1.0)
     
     # Hạ trục tọa độ xuống để có khoảng trống
@@ -43,7 +43,7 @@ def play_scene_4_5(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_2]: Đợi đọc "Vẽ đường phân phối độ phức tạp của AI..."
-    scene.wait(1.5)
+    scene.wait(0.5)
     # ---------------------------------------------------------
     
     def normal_dist(x, mu, sigma): return np.exp(-0.5 * ((x - mu) / sigma)**2)
@@ -58,7 +58,7 @@ def play_scene_4_5(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_3]: Đợi đọc "So sánh với người không phải bản xứ..."
-    scene.wait(2.0)
+    scene.wait(1.0)
     # ---------------------------------------------------------
     
     # Non-native Curve: Màu Cyan/Blue sáng để hòa trộn với Đỏ tạo ra tím, không bị dơ
@@ -71,7 +71,7 @@ def play_scene_4_5(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_4]: Đợi đọc "Hai đường này đè lên nhau..."
-    scene.wait(3.0)
+    scene.wait(10)
     # ---------------------------------------------------------
     
     # Vùng bị kết án nhầm (Highlight overlap)
@@ -88,7 +88,7 @@ def play_scene_4_5(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_5]: Đợi đọc "Kết án nhầm... Ngược lại, người bản xứ..."
-    scene.wait(3.0)
+    scene.wait(1.0)
     # ---------------------------------------------------------
     
     # Native Curve: Màu Xanh lá cây
@@ -101,7 +101,7 @@ def play_scene_4_5(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_6]: Đợi hết voice
-    scene.wait(4.0)
+    scene.wait(6.0)
     # ---------------------------------------------------------
     
     scene.play(FadeOut(Group(*scene.mobjects)), run_time=1.0)

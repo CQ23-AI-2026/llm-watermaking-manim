@@ -115,7 +115,7 @@ def play_scene_4_3(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_7]: Đợi âm thanh kết thúc
-    scene.wait(3.0)
+    scene.wait(4.0)
     # ---------------------------------------------------------
     
     scene.play(FadeOut(Group(*scene.mobjects)), run_time=1.0)

@@ -28,7 +28,7 @@ def play_scene_4_4(scene: Scene):
 
     # ---------------------------------------------------------
     # [WAIT_SYNC_1]: Đợi đọc "RADAR là một hệ thống học đối kháng..."
-    scene.wait(2.0)
+    scene.wait(3.0)
     # ---------------------------------------------------------
     
     # AI Cảnh sát (Detector) - Hình Khiên (Lục giác)
@@ -47,7 +47,7 @@ def play_scene_4_4(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_2]: Đợi đọc "Giữa cảnh sát và kẻ làm giả..."
-    scene.wait(2.0)
+    scene.wait(3.0)
     # ---------------------------------------------------------
     
     # Đường truyền dữ liệu: Kẻ làm giả -> Cảnh sát
@@ -64,7 +64,7 @@ def play_scene_4_4(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_3]: Đợi đọc "Kẻ làm giả gửi văn bản giả..."
-    scene.wait(2.0)
+    scene.wait(3.0)
     # ---------------------------------------------------------
     
     # Đường truyền dữ liệu: Cảnh sát -> Kẻ làm giả
@@ -81,7 +81,7 @@ def play_scene_4_4(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_4]: Đợi đọc "Cảnh sát kiểm tra và gửi phản hồi..."
-    scene.wait(2.0)
+    scene.wait(3.0)
     # ---------------------------------------------------------
     
     # Nhãn kết luận
@@ -93,7 +93,7 @@ def play_scene_4_4(scene: Scene):
     
     # ---------------------------------------------------------
     # [WAIT_SYNC_5]: Đợi đọc "Cả hai hệ thống cùng tiến hóa sắc bén..."
-    scene.wait(1.0)
+    scene.wait(2.0)
     # ---------------------------------------------------------
     
     # Hiệu ứng tiến hóa liên tục (Pulsing)

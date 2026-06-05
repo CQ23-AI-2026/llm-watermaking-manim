@@ -21,9 +21,9 @@ class Part4(Scene):
         self.wait(0.5)
         self.clear()
 
-        # play_scene_4_4(self)
-        # self.wait(0.5)
-        # self.clear()
+        play_scene_4_4(self)
+        self.wait(0.5)
+        self.clear()
 
-        # play_scene_4_5(self)
-        # self.wait(0.5)
+        play_scene_4_5(self)
+        self.wait(0.5)
