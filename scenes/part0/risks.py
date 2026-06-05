@@ -16,7 +16,7 @@ for path_pattern in venv_dirs:
 from manim import *
 from config.style import (
     VGText, VG_BLUE, VG_GRAY, VG_GOLD, VG_GREEN, VG_PURPLE, VG_ORANGE, VG_RED,
-    LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT
+    LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT, DEFAULT_FONT
 )
 
 def _get_audio_duration(path: str) -> float | None:
@@ -307,7 +307,7 @@ class RisksScene(Scene):
             "Dệt ngôn từ thành sợi nhớ dịu êm.\n"
             "Nhưng sâu thẳm trong từng câu chữ ấy,\n"
             "Là ước mơ được chạm tới tim người...\"",
-            font="Segoe UI",
+            font=DEFAULT_FONT,
             font_size=12,
             line_spacing=1.4,
             color=VG_GOLD,

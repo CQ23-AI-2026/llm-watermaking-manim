@@ -17,7 +17,7 @@ from manim import *
 from manim.utils.rate_functions import ease_in_quad
 from config.style import (
     VGText, VG_BLUE, VG_GRAY, VG_GOLD, VG_GREEN, VG_PURPLE, VG_ORANGE, VG_RED,
-    LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT, VG_LIGHT_BLUE
+    LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT, VG_LIGHT_BLUE, DEFAULT_FONT
 )
 
 def _get_audio_duration(path: str) -> float | None:
@@ -542,7 +542,7 @@ class DetectionScene(Scene):
 
         stamp_label = Paragraph(
             "Thảm họa dương tính giả (False Positives)\nThiên vị nghiêm trọng chống lại người viết không bản xứ",
-            font="Segoe UI", font_size=15, color=WHITE, line_spacing=1.3, alignment="center"
+            font=DEFAULT_FONT, font_size=15, color=WHITE, line_spacing=1.3, alignment="center"
         ).next_to(essay_sheet, DOWN, buff=0.35)
 
         # Hiệu ứng đập mạnh (Bounce)
@@ -669,7 +669,7 @@ class DetectionScene(Scene):
 
         loop_desc = Paragraph(
             "Người dùng chỉ cần đổi prompt hoặc paraphrase\nlà có thể dễ dàng vô hiệu hóa toàn bộ hệ thống phát hiện thụ động.",
-            font="Segoe UI", font_size=14, color=WHITE, line_spacing=1.3, alignment="center"
+            font=DEFAULT_FONT, font_size=14, color=WHITE, line_spacing=1.3, alignment="center"
         ).move_to([0, -2.0, 0])
 
         self.play(

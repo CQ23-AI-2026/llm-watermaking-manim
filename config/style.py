@@ -12,7 +12,7 @@ VG_GOLD   = '#F4D160'   # Soft gold — sang trọng, không chói mắt
 VG_LIGHT_BLUE = '#88C8F0'  # Pastel blue
 
 # Font settings
-DEFAULT_FONT = "Segoe UI"
+DEFAULT_FONT = "CMU Serif"
 DEFAULT_FONT_SIZE = 36
 LARGE_FONT_SIZE = 48
 SMALL_FONT_SIZE = 24
@@ -24,4 +24,5 @@ ITALIC = True
 
 class VGText(Text):
     def __init__(self, content, font_size=DEFAULT_FONT_SIZE, weight=DEFAULT_WEIGHT, slant="NORMAL", font=DEFAULT_FONT, **kwargs):
-        super().__init__(content, font=font, font_size=font_size, weight=weight, slant=slant, **kwargs)
+        super().__init__(content, font=font, font_size=font_size, weight=weight, slant=slant, disable_ligatures=True, **kwargs)
+
