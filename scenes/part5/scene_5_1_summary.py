@@ -8,11 +8,22 @@ from config.style import (
 def play_scene_5_1(scene: Scene):
     current_dir = os.path.dirname(__file__)
     voice_file = os.path.join(current_dir, "assets", "voice_5_1.mp3")
+
     if os.path.exists(voice_file):
         scene.add_sound(voice_file)
 
+    # 0. CENTRAL TITLE BUMPER
+    bumper_title = VGText("BỨC TRANH TOÀN CẢNH", font_size=LARGE_FONT_SIZE + 4, color=WHITE, weight=BOLD_WEIGHT).move_to(UP*0.2)
+    bumper_underline = Line(LEFT * 4, RIGHT * 4, color=VG_BLUE, stroke_width=2.5).next_to(bumper_title, DOWN, buff=0.2)
+    
+    scene.play(Write(bumper_title), run_time=1.0)
+    scene.play(Create(bumper_underline), run_time=0.5)
+    scene.wait(1.0)
+    
+    scene.play(FadeOut(bumper_title), FadeOut(bumper_underline), run_time=1.0)
+
     # 1. TITLE
-    part_title = VGText("TỔNG KẾT HÀNH TRÌNH", font_size=LARGE_FONT_SIZE - 8, color=VG_GOLD, weight=BOLD_WEIGHT).to_edge(UP, buff=0.4)
+    part_title = VGText("BỨC TRANH TOÀN CẢNH", font_size=LARGE_FONT_SIZE - 8, color=VG_GOLD, weight=BOLD_WEIGHT).move_to(UP * 3.2)
     underline = Line(LEFT * 4, RIGHT * 4, color=VG_GOLD, stroke_width=1.5, stroke_opacity=0.5).next_to(part_title, DOWN, buff=0.15)
     
     scene.play(Write(part_title), run_time=1.5)
@@ -28,7 +39,7 @@ def play_scene_5_1(scene: Scene):
 
     # ---------------------------------------------------------
     # [WAIT_SYNC_1]: Đợi đọc "hành trình kiểm soát máy móc tạo ngôn ngữ... bức tranh toàn cảnh"
-    scene.wait(5.0)
+    scene.wait(3.0)
     # ---------------------------------------------------------
 
     # Positions for 4 boxes
