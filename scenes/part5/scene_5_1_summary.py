@@ -12,81 +12,130 @@ def play_scene_5_1(scene: Scene):
         scene.add_sound(voice_file)
 
     # 1. TITLE
-    part_title = VGText("5.1: TỔNG KẾT HÀNH TRÌNH", font_size=LARGE_FONT_SIZE - 8, color=VG_GOLD, weight=BOLD_WEIGHT).to_edge(UP, buff=0.4)
+    part_title = VGText("TỔNG KẾT HÀNH TRÌNH", font_size=LARGE_FONT_SIZE - 8, color=VG_GOLD, weight=BOLD_WEIGHT).to_edge(UP, buff=0.4)
     underline = Line(LEFT * 4, RIGHT * 4, color=VG_GOLD, stroke_width=1.5, stroke_opacity=0.5).next_to(part_title, DOWN, buff=0.15)
     
     scene.play(Write(part_title), run_time=1.5)
     scene.play(Create(underline), run_time=1.0)
 
+    # 2. CENTRAL CONTROL CORE (PULSING)
+    core_circle = Circle(radius=1.1, color=WHITE, fill_color=BLACK, fill_opacity=0.9, stroke_width=3).move_to(DOWN * 0.25)
+    core_glow = core_circle.copy().set_stroke(VG_GOLD, width=8, opacity=0.4)
+    core_text = VGText("CONTROL LLMs", font_size=18, color=VG_GOLD, weight=BOLD_WEIGHT).move_to(core_circle.get_center())
+    core = VGroup(core_circle, core_glow, core_text)
+
+    scene.play(FadeIn(core, scale=0.5), run_time=1.5)
+
     # ---------------------------------------------------------
-    # [WAIT_SYNC_1]: Đợi đọc "hành trình kiểm soát máy móc tạo ngôn ngữ..."
-    scene.wait(2.0)
+    # [WAIT_SYNC_1]: Đợi đọc "hành trình kiểm soát máy móc tạo ngôn ngữ... bức tranh toàn cảnh"
+    scene.wait(5.0)
     # ---------------------------------------------------------
 
-    # Bốn khối vuông cho 4 phần
-    box_args = {"width": 2.5, "height": 1.5, "fill_opacity": 0.2, "stroke_width": 2}
-    
-    box1 = Rectangle(color=VG_RED, **box_args).move_to(UP * 1.0 + LEFT * 3.0)
-    text1 = VGText("Vũ khí hóa AI\n(Tin giả)", font_size=16, color=VG_RED).move_to(box1.get_center())
+    # Positions for 4 boxes
+    p1 = UP * 1.5 + LEFT * 4.0
+    p2 = UP * 1.5 + RIGHT * 4.0
+    p3 = DOWN * 2.0 + LEFT * 4.0
+    p4 = DOWN * 2.0 + RIGHT * 4.0
+
+    box_args = {"width": 3.6, "height": 1.2, "fill_opacity": 0.2, "stroke_width": 2, "corner_radius": 0.1}
+
+    # Box 1: Part 1
+    box1 = RoundedRectangle(color=VG_RED, **box_args).move_to(p1)
+    text1 = VGText("Rủi ro AI\n(Tin giả, đạo văn)", font_size=14, color=VG_RED, weight=BOLD_WEIGHT).move_to(box1.get_center())
     group1 = VGroup(box1, text1)
 
-    box2 = Rectangle(color=VG_GREEN, **box_args).move_to(UP * 1.0 + RIGHT * 3.0)
-    text2 = VGText("Text Watermark\n(Danh sách xanh)", font_size=16, color=VG_GREEN).move_to(box2.get_center())
+    # Box 2: Part 2
+    box2 = RoundedRectangle(color=VG_GREEN, **box_args).move_to(p2)
+    text2 = VGText("Text Watermarking\n(KGW, Gumbel, Christ)", font_size=14, color=VG_GREEN, weight=BOLD_WEIGHT).move_to(box2.get_center())
     group2 = VGroup(box2, text2)
 
-    box3 = Rectangle(color=VG_GOLD, **box_args).move_to(DOWN * 1.5 + LEFT * 3.0)
-    text3 = VGText("Model Watermark\n(Bảo vệ bản quyền)", font_size=16, color=VG_GOLD).move_to(box3.get_center())
+    # Box 3: Part 3
+    box3 = RoundedRectangle(color=VG_GOLD, **box_args).move_to(p3)
+    text3 = VGText("Model Watermarking\n(Fingerprinting, DeepJudge)", font_size=14, color=VG_GOLD, weight=BOLD_WEIGHT).move_to(box3.get_center())
     group3 = VGroup(box3, text3)
 
-    box4 = Rectangle(color=VG_BLUE, **box_args).move_to(DOWN * 1.5 + RIGHT * 3.0)
-    text4 = VGText("Phát hiện hậu kiểm\n(Máy dò AI)", font_size=16, color=VG_BLUE).move_to(box4.get_center())
+    # Box 4: Part 4
+    box4 = RoundedRectangle(color=VG_BLUE, **box_args).move_to(p4)
+    text4 = VGText("Post-hoc detection\n(False Positives)", font_size=14, color=VG_BLUE, weight=BOLD_WEIGHT).move_to(box4.get_center())
     group4 = VGroup(box4, text4)
 
+    # Connection lines from Core Center to Boxes
+    line1 = DashedLine(core_circle.get_center(), box1.get_corner(DOWN + RIGHT), color=VG_RED, stroke_width=2).set_z_index(-1)
+    line2 = DashedLine(core_circle.get_center(), box2.get_corner(DOWN + LEFT), color=VG_GREEN, stroke_width=2).set_z_index(-1)
+    line3 = DashedLine(core_circle.get_center(), box3.get_corner(UP + RIGHT), color=VG_GOLD, stroke_width=2).set_z_index(-1)
+    line4 = DashedLine(core_circle.get_center(), box4.get_corner(UP + LEFT), color=VG_BLUE, stroke_width=2).set_z_index(-1)
+
+    # Pulsing core micro-animation
+    scene.play(core_glow.animate.scale(1.2).set_opacity(0.1), run_time=1.0)
+    core_glow.scale(1.0/1.2).set_opacity(0.4) # Reset
+
+    # --- ACTIVATE PART 1 ---
+    scene.play(Create(line1), run_time=1.0)
     scene.play(FadeIn(group1, shift=UP), run_time=1.0)
+    
     # ---------------------------------------------------------
     # [WAIT_SYNC_2]: Đợi đọc xong "Từ phần đầu tiên, vũ khí hóa AI..."
-    scene.wait(2.0)
+    scene.wait(5.5)
     # ---------------------------------------------------------
 
+    # --- ACTIVATE PART 2 ---
+    scene.play(Create(line2), run_time=1.0)
     scene.play(FadeIn(group2, shift=UP), run_time=1.0)
-    # ---------------------------------------------------------
-    # [WAIT_SYNC_3]: Đợi đọc xong "âm thầm điều hướng danh sách xanh..."
-    scene.wait(2.0)
-    # ---------------------------------------------------------
-
-    scene.play(FadeIn(group3, shift=UP), run_time=1.0)
-    # ---------------------------------------------------------
-    # [WAIT_SYNC_4]: Đợi đọc xong "dấu vân tay ngầm và bài kiểm tra phản xạ..."
-    scene.wait(2.0)
-    # ---------------------------------------------------------
-
-    scene.play(FadeIn(group4, shift=UP), run_time=1.0)
-    # ---------------------------------------------------------
-    # [WAIT_SYNC_5]: Đợi đọc xong "các máy dò AI quá mong manh..."
-    scene.wait(2.0)
-    # ---------------------------------------------------------
-
-    # Quy tụ về trung tâm
-    core_circle = Circle(radius=1.2, color=WHITE, fill_opacity=0.1, stroke_width=3).move_to(DOWN*0.25)
-    core_text = VGText("AI CONTROL", font_size=20, color=WHITE, weight=BOLD_WEIGHT).move_to(core_circle.get_center())
     
+    # ---------------------------------------------------------
+    # [WAIT_SYNC_3]: Đợi đọc xong "đọc xong phần 2..."
+    scene.wait(15.5)
+    # ---------------------------------------------------------
+
+    # --- ACTIVATE PART 3 ---
+    scene.play(Create(line3), run_time=1.0)
+    scene.play(FadeIn(group3, shift=UP), run_time=1.0)
+    
+    # ---------------------------------------------------------
+    # [WAIT_SYNC_4]: Đợi đọc xong "đọc xong phần 3..."
+    scene.wait(14.5)
+    # ---------------------------------------------------------
+
+    # --- ACTIVATE PART 4 ---
+    scene.play(Create(line4), run_time=1.0)
+    scene.play(FadeIn(group4, shift=UP), run_time=1.0)
+    
+    # ---------------------------------------------------------
+    # [WAIT_SYNC_5]: Đợi đọc xong "đọc xong phần 4..."
+    scene.wait(11)
+    # ---------------------------------------------------------
+
+    # --- CONVERGENCE & SHOCKWAVE ---
+    # Draw energy flowing back to the core
+    back_line1 = line1.copy().set_color(WHITE).set_stroke(width=3)
+    back_line2 = line2.copy().set_color(WHITE).set_stroke(width=3)
+    back_line3 = line3.copy().set_color(WHITE).set_stroke(width=3)
+    back_line4 = line4.copy().set_color(WHITE).set_stroke(width=3)
+
     scene.play(
-        Transform(group1, core_circle.copy()),
-        Transform(group2, core_circle.copy()),
-        Transform(group3, core_circle.copy()),
-        Transform(group4, core_circle.copy()),
-        FadeIn(core_circle),
-        Write(core_text),
-        run_time=2.0
+        ShowPassingFlash(back_line1, time_width=0.5),
+        ShowPassingFlash(back_line2, time_width=0.5),
+        ShowPassingFlash(back_line3, time_width=0.5),
+        ShowPassingFlash(back_line4, time_width=0.5),
+        run_time=1.5
     )
 
-    # Năng lượng tỏa ra
-    glow = core_circle.copy().set_fill(VG_BLUE, opacity=0.4).set_stroke(VG_BLUE, width=0)
-    scene.play(glow.animate.scale(3).set_opacity(0), run_time=1.5, rate_func=linear)
+    # Core flares up and sends a shockwave to clear the screen
+    shockwave = Circle(radius=1.1, color=VG_GOLD, stroke_width=4).move_to(core_circle.get_center())
+    scene.add(shockwave)
+    
+    scene.play(
+        shockwave.animate.scale(8.0).set_opacity(0),
+        FadeOut(group1), FadeOut(group2), FadeOut(group3), FadeOut(group4),
+        FadeOut(line1), FadeOut(line2), FadeOut(line3), FadeOut(line4),
+        FadeOut(core), FadeOut(part_title), FadeOut(underline),
+        run_time=2.0,
+        rate_func=exponential_decay
+    )
 
     # ---------------------------------------------------------
     # [WAIT_SYNC_6]: Đợi hết voice
-    scene.wait(2.0)
+    scene.wait(0.1)
     # ---------------------------------------------------------
 
-    scene.play(FadeOut(Group(*scene.mobjects)), run_time=1.0)
+    scene.play(FadeOut(Group(*scene.mobjects)), run_time=0.5)
