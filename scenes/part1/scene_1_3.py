@@ -67,13 +67,23 @@ def _get_audio_duration(path: str) -> float | None:
     if not path or not os.path.exists(path):
         return None
     try:
-        completed = subprocess.run(["ffmpeg", "-i", path], capture_output=True, text=True)
-    except FileNotFoundError:
-        return None
-    match = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", completed.stderr + completed.stdout)
-    if not match:
-        return None
-    return int(match.group(1)) * 3600 + int(match.group(2)) * 60 + float(match.group(3))
+        from mutagen.mp3 import MP3
+        return float(MP3(path).info.length)
+    except Exception:
+        pass
+    try:
+        from moviepy.editor import AudioFileClip
+        with AudioFileClip(path) as clip:
+            return float(clip.duration)
+    except Exception:
+        pass
+    try:
+        from moviepy import AudioFileClip
+        with AudioFileClip(path) as clip:
+            return float(clip.duration)
+    except Exception:
+        pass
+    return None
 
 def _state_circle(text, color, text_size=36):
     circle = Circle(radius=0.45)
@@ -87,11 +97,13 @@ def _state_circle(text, color, text_size=36):
 def play_part1_scene_1_3(scene: Scene) -> None:
     scene.camera.background_color = "#080808" # Deep aesthetic dark
 
-    voice_path = os.path.join("scenes", "part1", "voice", "1_3.mp3")
+    current_dir = os.path.dirname(__file__)
+    voice_path = os.path.join(current_dir, "voice", "1_3.mp3")
     voice_duration = _get_audio_duration(voice_path)
     start_time = scene.renderer.time
     if voice_duration is not None:
-        scene.add_sound(voice_path)
+        with open("audio_times.txt", "a", encoding="utf-8") as f:
+            f.write(f"{voice_path}|{start_time}\n")
 
     title = VGText(
         "Hai thành phần của Watermarking Scheme",

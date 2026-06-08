@@ -12,7 +12,7 @@ VG_GOLD   = '#F4D160'   # Soft gold — sang trọng, không chói mắt
 VG_LIGHT_BLUE = '#88C8F0'  # Pastel blue
 
 # Font settings
-DEFAULT_FONT = "Segoe UI"
+DEFAULT_FONT = "CMU Serif"
 DEFAULT_FONT_SIZE = 36
 LARGE_FONT_SIZE = 48
 SMALL_FONT_SIZE = 24
