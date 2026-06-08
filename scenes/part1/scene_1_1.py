@@ -9,20 +9,24 @@ from config.style import VGText, VG_GRAY, VG_LIGHT_BLUE, VG_ORANGE, VG_GREEN, BO
 def _get_audio_duration(path: str) -> float | None:
     if not path or not os.path.exists(path):
         return None
-
     try:
-        completed = subprocess.run(["ffmpeg", "-i", path], capture_output=True, text=True)
-    except FileNotFoundError:
-        return None
-
-    match = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", completed.stderr + completed.stdout)
-    if not match:
-        return None
-
-    hours = int(match.group(1))
-    minutes = int(match.group(2))
-    seconds = float(match.group(3))
-    return hours * 3600 + minutes * 60 + seconds
+        from mutagen.mp3 import MP3
+        return float(MP3(path).info.length)
+    except Exception:
+        pass
+    try:
+        from moviepy.editor import AudioFileClip
+        with AudioFileClip(path) as clip:
+            return float(clip.duration)
+    except Exception:
+        pass
+    try:
+        from moviepy import AudioFileClip
+        with AudioFileClip(path) as clip:
+            return float(clip.duration)
+    except Exception:
+        pass
+    return None
 
 
 def _paper_icon(color: str) -> VGroup:
@@ -179,11 +183,14 @@ def _timeline_scene(scene: Scene) -> None:
 
 def play_part1_scene_1_1(scene: Scene) -> None:
     # Attach voice audio if available
-    voice_path = os.path.join("scenes", "part1", "voice", "1_1.mp3")
+    current_dir = os.path.dirname(__file__)
+    voice_path = os.path.join(current_dir, "voice", "1_1.mp3")
     voice_duration = _get_audio_duration(voice_path)
+    print(f"\n[DEBUG] SCENE 1_1 AUDIO PATH: {voice_path} | EXISTS: {os.path.exists(voice_path)} | DURATION: {voice_duration}\n")
     start_time = scene.renderer.time
     if voice_duration is not None:
-        scene.add_sound(voice_path)
+        with open("audio_times.txt", "a", encoding="utf-8") as f:
+            f.write(f"{voice_path}|{start_time}\n")
 
     _timeline_scene(scene)
     if voice_duration is not None:
@@ -196,7 +203,8 @@ def play_part1_scene_1_1(scene: Scene) -> None:
 class Scene11_WatermarkHistory(Scene):
     def construct(self):
         # Attach voice audio if available (ensures audio is embedded when rendering this scene)
-        voice_path = os.path.join("scenes", "part1", "voice", "1_1.mp3")
+        current_dir = os.path.dirname(__file__)
+        voice_path = os.path.join(current_dir, "voice", "1_1.mp3")
         if os.path.exists(voice_path):
             self.add_sound(voice_path)
 
