@@ -1,0 +1,10 @@
+scenes\part0\detection.py:L121 - poem1_text = Paragraph(
+scenes\part0\detection.py:L153 - poem2_text = Paragraph(
+scenes\part0\detection.py:L543 - stamp_label = Paragraph(
+scenes\part0\detection.py:L670 - loop_desc = Paragraph(
+scenes\part0\detection.py:L733 - doc_text = Paragraph(
+scenes\part0\risks.py:L305 - ai_text = Paragraph(
+scenes\part3\introduction.py:L172 - q_left = Paragraph(
+scenes\part3\introduction.py:L205 - q_right = Paragraph(
+scenes\part3\introduction.py:L370 - protect_urgency = Paragraph(
+scenes\part3\threats.py:L159 - desc_text = Paragraph(
