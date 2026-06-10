@@ -16,6 +16,7 @@ Nếu Text Watermark bảo vệ nội dung đầu ra, thì Model Watermark bảo
 Một mô hình ngôn ngữ lớn không chỉ là một file phần mềm thông thường.
 Đằng sau nó là dữ liệu huấn luyện khổng lồ, hạ tầng tính toán đắt đỏ, đội ngũ nghiên cứu, quá trình tinh chỉnh, đánh giá, căn chỉnh an toàn và tối ưu hóa trong nhiều tháng hoặc nhiều năm.
 Vì vậy, một mô hình AI mạnh là một tài sản trí tuệ có giá trị rất lớn.
+---
 Nhưng khác với phần mềm truyền thống, mô hình AI có một điểm yếu đặc biệt:
 Bạn không cần nhìn thấy mã nguồn hay trọng số bên trong để học theo nó.
 Chỉ cần có quyền truy cập API, kẻ tấn công có thể gửi rất nhiều câu hỏi đến mô hình, thu thập câu trả lời, rồi dùng chính dữ liệu đó để huấn luyện một mô hình khác.

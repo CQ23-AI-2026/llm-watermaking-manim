@@ -314,7 +314,7 @@ class IntroductionScene(Scene):
             )
             self.wait(0.4)
         
-        self.wait(2.0)
+        self.wait(22.0)
 
         # Gom toàn bộ nhóm chi phí
         cost_all = VGroup(cost_boxes, cost_arrows)
@@ -373,7 +373,7 @@ class IntroductionScene(Scene):
         ).scale(14/28).move_to([0, -2.2, 0])
 
         self.play(Write(protect_urgency), run_time=1.5)
-        self.wait(max(1.0, dur_3_1 - 18.6))
+        self.wait(max(1.0, dur_3_1 - 38.6))
 
         # Dọn dẹp toàn bộ phân cảnh
         self.play(

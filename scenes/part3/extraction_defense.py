@@ -38,25 +38,28 @@ def _get_audio_duration(path: str) -> float | None:
 
 class ExtractionDefenseScene(Scene):
     """Phân cảnh Phòng thủ chống Model Extraction (Cảnh 3.4 - 3.9).
-    Slide 1: DRW (Cảnh 3.4 & 3.5)
-    Slide 2: GINSEW (Cảnh 3.6)
-    Slide 3: CATER (Cảnh 3.7)
-    Slide 4: Cơ chế Probing & Phân tích phổ (Cảnh 3.8)
-    Slide 5: Đánh đổi chất lượng & Độ bền bỉ (Cảnh 3.9)
+    Slide 1: Khái niệm Model Extraction & Tín hiệu ẩn (Cảnh 3.4)
+    Slide 2: DRW - Kháng Distillation (Cảnh 3.5)
+    Slide 3: GINSEW - Thủy vân tự hồi quy (Cảnh 3.6)
+    Slide 4: CATER - Thủy vân có điều kiện (Cảnh 3.7)
+    Slide 5: Cơ chế Probing & Phân tích phổ (Cảnh 3.8)
+    Slide 6: Đánh đổi chất lượng & Độ bền bỉ (Cảnh 3.9)
     """
     def construct(self):
         current_dir = os.path.dirname(__file__)
         
-        # Nền lưới mờ đồng bộ công nghệ
-        grid = NumberPlane(
-            background_line_style={
-                "stroke_color": VG_GRAY,
-                "stroke_width": 1,
-                "stroke_opacity": 0.06,
-            },
-            axis_config={"stroke_opacity": 0},
-        )
-        self.add(grid)
+        # Thêm grid nếu chưa có trên screen
+        grid_exists = any(isinstance(m, NumberPlane) for m in self.mobjects)
+        if not grid_exists:
+            grid = NumberPlane(
+                background_line_style={
+                    "stroke_color": VG_GRAY,
+                    "stroke_width": 1,
+                    "stroke_opacity": 0.06,
+                },
+                axis_config={"stroke_opacity": 0},
+            )
+            self.add(grid)
 
         # Tiêu đề chính của phân cảnh
         scene_title = VGText(
@@ -73,13 +76,23 @@ class ExtractionDefenseScene(Scene):
 
         # Audio paths & durations
         extraction_dir = os.path.join(current_dir, "assets", "extraction")
-        voice_1 = os.path.join(extraction_dir, "extraction_intro_drw.mp3")
+        voice_1 = os.path.join(extraction_dir, "extraction_intro_drw.mp3") # Legacy combined file
+        voice_1a = os.path.join(extraction_dir, "extraction_intro.mp3") # Split 3.4
+        voice_1b = os.path.join(extraction_dir, "extraction_drw.mp3") # Split 3.5
         voice_2 = os.path.join(extraction_dir, "extraction_ginsew.mp3")
         voice_3 = os.path.join(extraction_dir, "extraction_cater.mp3")
         voice_4 = os.path.join(extraction_dir, "extraction_probing.mp3")
         voice_5 = os.path.join(extraction_dir, "extraction_tradeoff.mp3")
 
         dur_1 = _get_audio_duration(voice_1) or 86.0
+        dur_1a = _get_audio_duration(voice_1a) or 42.0
+        dur_1b = _get_audio_duration(voice_1b) or 44.0
+        
+        # Nếu chỉ có tệp gộp cũ, ta chia đôi thời gian ước tính cho 2 slide
+        if not os.path.exists(voice_1a) and not os.path.exists(voice_1b) and os.path.exists(voice_1):
+            dur_1a = dur_1 * 0.48
+            dur_1b = dur_1 * 0.52
+
         dur_2 = _get_audio_duration(voice_2) or 74.0
         dur_3 = _get_audio_duration(voice_3) or 60.0
         dur_4 = _get_audio_duration(voice_4) or 60.0
@@ -94,22 +107,22 @@ class ExtractionDefenseScene(Scene):
         self.wait(0.5)
 
         # =========================================================================
-        # SLIDE 1: DRW - DISTILLATION-RESISTANT WATERMARKING (Cảnh 3.4 & 3.5)
+        # SLIDE 1: MODEL EXTRACTION INTRO (Cảnh 3.4)
         # =========================================================================
-        if os.path.exists(voice_1):
-            self.add_sound(voice_1)
+        if os.path.exists(voice_1a):
+            self.add_sound(voice_1a)
+        elif os.path.exists(voice_1):
+            self.add_sound(voice_1) # Phát tệp legacy nếu có
 
-        # --- PHASE 1: SƠ ĐỒ CHUYỂN DỮ LIỆU & DISTILLATION ---
-        tag_1 = VGText("PHÒNG THỦ 01", font_size=36, color=VG_GREEN, weight=BOLD_WEIGHT).scale(18/36).move_to([-3.8, 1.8, 0])
-        title_1 = VGText("DRW - KHÁNG DISTILLATION", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).next_to(tag_1, DOWN, buff=0.15).align_to(tag_1, LEFT)
-        line_1 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_GREEN, stroke_width=2, stroke_opacity=0.6).next_to(title_1, DOWN, buff=0.15).align_to(title_1, LEFT)
+        title_ext = VGText("TRÍCH XUẤT MÔ HÌNH & CHƯNG CẤT", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
+        line_ext = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_GREEN, stroke_width=2, stroke_opacity=0.6).next_to(title_ext, DOWN, buff=0.15).align_to(title_ext, LEFT)
         
-        desc_1_phase1 = VGParagraph(
+        desc_ext = VGParagraph(
             "Mô hình gốc (Teacher) bảo vệ API\nbằng cách nhúng watermark vào dữ liệu đầu ra.\nKẻ tấn công truy vấn và dùng dữ liệu đó\nđể chưng cất (distill) mô hình học sinh.",
             font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_1, DOWN, buff=0.4).align_to(line_1, LEFT)
+        ).scale(14/28).next_to(line_ext, DOWN, buff=0.4).align_to(line_ext, LEFT)
 
-        left_g1 = VGroup(tag_1, title_1, line_1, desc_1_phase1)
+        left_g_ext = VGroup(title_ext, line_ext, desc_ext)
 
         # Visual bên phải Phase 1
         teacher_box = RoundedRectangle(corner_radius=0.08, width=2.2, height=1.0, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=1.5).move_to([1.8, 0.8, 0])
@@ -129,24 +142,41 @@ class ExtractionDefenseScene(Scene):
         a_s_to_t = Arrow(student_box.get_top(), teacher_box.get_bottom(), buff=0.1, color=VG_GOLD, stroke_width=1.5, stroke_opacity=0.6)
         prob_lbl = VGText("API Probing (Hậu kiểm)", font_size=14, color=VG_GOLD).scale(7/14).next_to(a_s_to_t, LEFT, buff=0.1)
 
-        right_g1_p1 = VGroup(teacher_group, data_group, student_group, a_t_to_d, a_d_to_s, a_s_to_t, prob_lbl)
+        right_g_ext = VGroup(teacher_group, data_group, student_group, a_t_to_d, a_d_to_s, a_s_to_t, prob_lbl)
 
-        # Xuất hiện Phase 1
+        # Xuất hiện Slide 1
         self.play(
-            FadeIn(left_g1, shift=UP * 0.3),
-            FadeIn(right_g1_p1, shift=LEFT * 0.4),
+            FadeIn(left_g_ext, shift=UP * 0.3),
+            FadeIn(right_g_ext, shift=LEFT * 0.4),
             run_time=1.2
         )
         
-        # Chờ nửa thời lượng của voice_1 để giới thiệu tổng quan
-        phase1_duration = max(5.0, dur_1 * 0.45)
-        self.wait(phase1_duration - 1.2)
+        # Chờ thời lượng của Slide 1
+        self.wait(max(3.0, dur_1a - 1.2))
 
-        # --- PHASE 2: THAY ĐỔI VECTOR XÁC SUẤT TRONG KHÔNG GIAN XÁC SUẤT ---
-        desc_1_phase2 = VGParagraph(
+        # Dọn dẹp Slide 1
+        self.play(
+            FadeOut(left_g_ext),
+            FadeOut(right_g_ext),
+            run_time=0.8
+        )
+        self.wait(0.2)
+
+        # =========================================================================
+        # SLIDE 2: DRW - DISTILLATION-RESISTANT WATERMARKING (Cảnh 3.5)
+        # =========================================================================
+        if os.path.exists(voice_1b):
+            self.add_sound(voice_1b)
+
+        title_drw = VGText("DRW - KHÁNG DISTILLATION", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
+        line_drw = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_GREEN, stroke_width=2, stroke_opacity=0.6).next_to(title_drw, DOWN, buff=0.15).align_to(title_drw, LEFT)
+        
+        desc_drw = VGParagraph(
             "DRW can thiệp rất nhẹ vào vector phân phối\nxác suất dự đoán đầu ra. Sự thay đổi này\nvô hình với người dùng nhưng mô hình học sinh\nsẽ hấp thụ nó trong quá trình huấn luyện.",
             font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_1, DOWN, buff=0.4).align_to(line_1, LEFT)
+        ).scale(14/28).next_to(line_drw, DOWN, buff=0.4).align_to(line_drw, LEFT)
+
+        left_g_drw = VGroup(title_drw, line_drw, desc_drw)
 
         # Biểu đồ phân phối xác suất
         axes = Axes(x_range=[0, 6, 1], y_range=[0, 4, 1], x_length=4.2, y_length=2.5, axis_config={"stroke_color": VG_GRAY, "stroke_width": 1}).move_to([3.4, -0.4, 0])
@@ -172,18 +202,13 @@ class ExtractionDefenseScene(Scene):
             bars_wm.add(b_w)
 
         chart_label = VGText("Biến đổi phân phối xác suất P(token)", font_size=16, color=VG_GOLD).scale(8/16).next_to(axes, UP, buff=0.2)
-        right_g1_p2 = VGroup(axes, bars_orig, chart_label)
+        right_g_drw = VGroup(axes, bars_orig, chart_label)
 
-        # Chuyển đổi từ Phase 1 sang Phase 2
+        # Xuất hiện Slide 2
         self.play(
-            FadeOut(desc_1_phase1),
-            FadeOut(right_g1_p1),
-            run_time=0.8
-        )
-        self.play(
-            FadeIn(desc_1_phase2),
-            FadeIn(right_g1_p2),
-            run_time=1.0
+            FadeIn(left_g_drw, shift=UP * 0.3),
+            FadeIn(right_g_drw, shift=LEFT * 0.4),
+            run_time=1.2
         )
         
         # Hiệu ứng nhấp nháy chuyển từ bars_orig sang bars_wm
@@ -194,38 +219,33 @@ class ExtractionDefenseScene(Scene):
             run_time=1.5
         )
         
-        # Chờ nốt thời gian còn lại của voice_1
-        phase2_duration = max(5.0, dur_1 - phase1_duration - 0.8 - 1.0 - 1.5)
-        self.wait(phase2_duration)
+        # Chờ nốt thời gian còn lại của Slide 2
+        self.wait(max(3.0, dur_1b - 1.2 - 1.5 - 1.5))
 
-        # Dọn dẹp Slide 1
+        # Dọn dẹp Slide 2
         self.play(
-            FadeOut(tag_1),
-            FadeOut(title_1),
-            FadeOut(line_1),
-            FadeOut(desc_1_phase2),
-            FadeOut(right_g1_p2),
+            FadeOut(left_g_drw),
+            FadeOut(right_g_drw),
             FadeOut(bars_orig),
             run_time=0.8
         )
         self.wait(0.2)
 
         # =========================================================================
-        # SLIDE 2: GINSEW - THỦY VÂN SINH VĂN BẢN VÔ HÌNH (Cảnh 3.6)
+        # SLIDE 3: GINSEW - THỦY VÂN SINH VĂN BẢN VÔ HÌNH (Cảnh 3.6)
         # =========================================================================
         if os.path.exists(voice_2):
             self.add_sound(voice_2)
 
-        tag_2 = VGText("PHÒNG THỦ 02", font_size=36, color=VG_BLUE, weight=BOLD_WEIGHT).scale(18/36).move_to([-3.8, 1.8, 0])
-        title_2 = VGText("GINSEW - THỦY VÂN TỰ HỒI QUY", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).next_to(tag_2, DOWN, buff=0.15).align_to(tag_2, LEFT)
-        line_2 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_BLUE, stroke_width=2, stroke_opacity=0.6).next_to(title_2, DOWN, buff=0.15).align_to(title_2, LEFT)
+        title_ginsew = VGText("GINSEW - THỦY VÂN TỰ HỒI QUY", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
+        line_ginsew = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_BLUE, stroke_width=2, stroke_opacity=0.6).next_to(title_ginsew, DOWN, buff=0.15).align_to(title_ginsew, LEFT)
         
-        desc_2 = VGParagraph(
+        desc_ginsew = VGParagraph(
             "GINSEW dành cho mô hình sinh văn bản.\nTại mỗi bước sinh, mô hình can thiệp nhẹ\nvào vector xác suất của các token kế tiếp,\ntạo ra một chữ ký thống kê vô hình\nở chuỗi văn bản đầu ra.",
             font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_2, DOWN, buff=0.4).align_to(line_2, LEFT)
+        ).scale(14/28).next_to(line_ginsew, DOWN, buff=0.4).align_to(line_ginsew, LEFT)
 
-        left_g2 = VGroup(tag_2, title_2, line_2, desc_2)
+        left_g_ginsew = VGroup(title_ginsew, line_ginsew, desc_ginsew)
 
         # Visual GINSEW: Chuỗi sinh Token tự hồi quy
         tok_1 = RoundedRectangle(corner_radius=0.05, width=1.3, height=0.6, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.0).move_to([1.2, 0.8, 0])
@@ -264,11 +284,11 @@ class ExtractionDefenseScene(Scene):
 
         arrow_v_t3 = Arrow(v_box.get_right(), tok_3.get_bottom(), buff=0.1, color=VG_GREEN, stroke_width=2)
 
-        right_g2 = VGroup(t1_group, t2_group, arrow_t1_t2, v_box, v_lbl, lines_v, arrow_t2_v, t3_group, arrow_v_t3)
+        right_g_ginsew = VGroup(t1_group, t2_group, arrow_t1_t2, v_box, v_lbl, lines_v, arrow_t2_v, t3_group, arrow_v_t3)
 
         self.play(
-            FadeIn(left_g2, shift=UP * 0.3),
-            FadeIn(right_g2, shift=LEFT * 0.4),
+            FadeIn(left_g_ginsew, shift=UP * 0.3),
+            FadeIn(right_g_ginsew, shift=LEFT * 0.4),
             run_time=1.2
         )
 
@@ -288,28 +308,27 @@ class ExtractionDefenseScene(Scene):
         self.wait(max(1.0, dur_2 - 1.2 - 1.5 - 1.2 - 0.8)) # trừ thời gian anim và exit
 
         self.play(
-            FadeOut(left_g2, shift=LEFT * 0.5),
-            FadeOut(right_g2, shift=LEFT * 0.5),
+            FadeOut(left_g_ginsew, shift=LEFT * 0.5),
+            FadeOut(right_g_ginsew, shift=LEFT * 0.5),
             run_time=0.8
         )
         self.wait(0.2)
 
         # =========================================================================
-        # SLIDE 3: CATER - WATERMARK CÓ ĐIỀU KIỆN (Cảnh 3.7)
+        # SLIDE 4: CATER - WATERMARK CÓ ĐIỀU KIỆN (Cảnh 3.7)
         # =========================================================================
         if os.path.exists(voice_3):
             self.add_sound(voice_3)
 
-        tag_3 = VGText("PHÒNG THỦ 03", font_size=36, color=VG_PURPLE, weight=BOLD_WEIGHT).scale(18/36).move_to([-3.8, 1.8, 0])
-        title_3 = VGText("CATER - THỦY VÂN CÓ ĐIỀU KIỆN", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).next_to(tag_3, DOWN, buff=0.15).align_to(tag_3, LEFT)
-        line_3 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_PURPLE, stroke_width=2, stroke_opacity=0.6).next_to(title_3, DOWN, buff=0.15).align_to(title_3, LEFT)
+        title_cater = VGText("CATER - THỦY VÂN CÓ ĐIỀU KIỆN", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
+        line_cater = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_PURPLE, stroke_width=2, stroke_opacity=0.6).next_to(title_cater, DOWN, buff=0.15).align_to(title_cater, LEFT)
         
-        desc_3 = VGParagraph(
+        desc_cater = VGParagraph(
             "CATER phụ thuộc chặt chẽ vào ngữ cảnh.\nKhi phát hiện điều kiện định sẵn trong văn bản,\nmô hình thay đổi lựa chọn từ đồng nghĩa.\nĐiều này tối ưu hóa độ tự nhiên của văn bản\nvà khả năng phát hiện mô hình bắt chước.",
             font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_3, DOWN, buff=0.4).align_to(line_3, LEFT)
+        ).scale(14/28).next_to(line_cater, DOWN, buff=0.4).align_to(line_cater, LEFT)
 
-        left_g3 = VGroup(tag_3, title_3, line_3, desc_3)
+        left_g_cater = VGroup(title_cater, line_cater, desc_cater)
 
         # Visual CATER: Cây quyết định lựa chọn từ theo điều kiện
         root_node = RoundedRectangle(corner_radius=0.06, width=2.4, height=0.8, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=1.5).move_to([3.2, 1.0, 0])
@@ -330,11 +349,11 @@ class ExtractionDefenseScene(Scene):
         a_yes = Arrow(root_node.get_bottom(), node_yes.get_top(), buff=0.1, color=VG_GREEN, stroke_width=2)
         a_no = Arrow(root_node.get_bottom(), node_no.get_top(), buff=0.1, color=VG_GRAY, stroke_width=1.5)
 
-        right_g3 = VGroup(root_group, yes_group, no_group, a_yes, a_no)
+        right_g_cater = VGroup(root_group, yes_group, no_group, a_yes, a_no)
 
         self.play(
-            FadeIn(left_g3, shift=UP * 0.3),
-            FadeIn(right_g3, shift=LEFT * 0.4),
+            FadeIn(left_g_cater, shift=UP * 0.3),
+            FadeIn(right_g_cater, shift=LEFT * 0.4),
             run_time=1.2
         )
 
@@ -354,28 +373,27 @@ class ExtractionDefenseScene(Scene):
         self.wait(max(1.0, dur_3 - 1.2 - 1.5 - 1.6 - 0.8))
 
         self.play(
-            FadeOut(left_g3, shift=LEFT * 0.5),
-            FadeOut(right_g3, shift=LEFT * 0.5),
+            FadeOut(left_g_cater, shift=LEFT * 0.5),
+            FadeOut(right_g_cater, shift=LEFT * 0.5),
             run_time=0.8
         )
         self.wait(0.2)
 
         # =========================================================================
-        # SLIDE 4: PROBING & PHÂN TÍCH PHỔ (Cảnh 3.8)
+        # SLIDE 5: PROBING & PHÂN TÍCH PHỔ (Cảnh 3.8)
         # =========================================================================
         if os.path.exists(voice_4):
             self.add_sound(voice_4)
 
-        tag_4 = VGText("PHÁT HIỆN", font_size=36, color=VG_GOLD, weight=BOLD_WEIGHT).scale(18/36).move_to([-3.8, 1.8, 0])
-        title_4 = VGText("CƠ CHẾ PROBING VÀ PHÂN TÍCH PHỔ", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).next_to(tag_4, DOWN, buff=0.15).align_to(tag_4, LEFT)
-        line_4 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_GOLD, stroke_width=2, stroke_opacity=0.6).next_to(title_4, DOWN, buff=0.15).align_to(title_4, LEFT)
+        title_prob = VGText("CƠ CHẾ PROBING VÀ PHÂN TÍCH PHỔ", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
+        line_prob = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_GOLD, stroke_width=2, stroke_opacity=0.6).next_to(title_prob, DOWN, buff=0.15).align_to(title_prob, LEFT)
         
-        desc_4 = VGParagraph(
+        desc_prob = VGParagraph(
             "Để xác minh watermark, chủ sở hữu gửi các\ntruy vấn probing đặc biệt đến API nghi ngờ.\nPhân tích phổ (Periodogram) các phản hồi\nsẽ chỉ ra tín hiệu tuần hoàn bí mật\nnổi lên rõ rệt khỏi nhiễu nền.",
             font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_4, DOWN, buff=0.4).align_to(line_4, LEFT)
+        ).scale(14/28).next_to(line_prob, DOWN, buff=0.4).align_to(line_prob, LEFT)
 
-        left_g4 = VGroup(tag_4, title_4, line_4, desc_4)
+        left_g_prob = VGroup(title_prob, line_prob, desc_prob)
 
         # Visual Probing: Đồ thị phân tích phổ Periodogram
         axes_4 = Axes(
@@ -402,12 +420,12 @@ class ExtractionDefenseScene(Scene):
         # Mũi tên chỉ vào đỉnh
         pointer_arrow = Arrow(axes_4.c2p(5.5, 3.2), axes_4.c2p(5.0, 2.5), buff=0.05, color=VG_GOLD, stroke_width=1.5)
 
-        right_g4_p1 = VGroup(axes_4, noise_curve, chart_title_4)
-        right_g4_p2 = VGroup(peak_curve, detector_lbl, pointer_arrow)
+        right_g_prob1 = VGroup(axes_4, noise_curve, chart_title_4)
+        right_g_prob2 = VGroup(peak_curve, detector_lbl, pointer_arrow)
 
         self.play(
-            FadeIn(left_g4, shift=UP * 0.3),
-            FadeIn(right_g4_p1, shift=LEFT * 0.4),
+            FadeIn(left_g_prob, shift=UP * 0.3),
+            FadeIn(right_g_prob1, shift=LEFT * 0.4),
             run_time=1.2
         )
 
@@ -424,30 +442,29 @@ class ExtractionDefenseScene(Scene):
         self.wait(max(1.0, dur_4 - 1.2 - 2.0 - 1.8 - 0.8))
 
         self.play(
-            FadeOut(left_g4, shift=LEFT * 0.5),
-            FadeOut(right_g4_p1),
-            FadeOut(right_g4_p2),
+            FadeOut(left_g_prob, shift=LEFT * 0.5),
+            FadeOut(right_g_prob1),
+            FadeOut(right_g_prob2),
             FadeOut(noise_curve),
             run_time=0.8
         )
         self.wait(0.2)
 
         # =========================================================================
-        # SLIDE 5: ĐÁNH ĐỔI CHẤT LƯỢNG & PHA LOÃNG DỮ LIỆU (Cảnh 3.9)
+        # SLIDE 6: ĐÁNH ĐỔI CHẤT LƯỢNG & PHA LOÃNG DỮ LIỆU (Cảnh 3.9)
         # =========================================================================
         if os.path.exists(voice_5):
             self.add_sound(voice_5)
 
-        tag_5 = VGText("ĐÁNH GIÁ", font_size=36, color=VG_ORANGE, weight=BOLD_WEIGHT).scale(18/36).move_to([-3.8, 1.8, 0])
-        title_5 = VGText("ĐÁNH ĐỔI CHẤT LƯỢNG & ĐỘ BỀN BỈ", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).next_to(tag_5, DOWN, buff=0.15).align_to(tag_5, LEFT)
-        line_5 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_ORANGE, stroke_width=2, stroke_opacity=0.6).next_to(title_5, DOWN, buff=0.15).align_to(title_5, LEFT)
+        title_trade = VGText("ĐÁNH ĐỔI CHẤT LƯỢNG & ĐỘ BỀN BỈ", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
+        line_trade = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_ORANGE, stroke_width=2, stroke_opacity=0.6).next_to(title_trade, DOWN, buff=0.15).align_to(title_trade, LEFT)
         
-        desc_5 = VGParagraph(
+        desc_trade = VGParagraph(
             "Tồn tại sự đánh đổi giữa chất lượng văn bản\nsinh ra và khả năng phát hiện. Bên cạnh đó,\nmột watermark tốt phải bền bỉ ngay cả khi\ndữ liệu chưng cất bị pha loãng bằng cách\ntrộn lẫn với các nguồn dữ liệu sạch khác.",
             font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_5, DOWN, buff=0.4).align_to(line_5, LEFT)
+        ).scale(14/28).next_to(line_trade, DOWN, buff=0.4).align_to(line_trade, LEFT)
 
-        left_g5 = VGroup(tag_5, title_5, line_5, desc_5)
+        left_g_trade = VGroup(title_trade, line_trade, desc_trade)
 
         # Visual Slide 5: Cán cân đánh đổi (Quality vs Detectability)
         base = Polygon(
@@ -472,11 +489,11 @@ class ExtractionDefenseScene(Scene):
 
         beam_system = VGroup(scale_beam, left_pan_group, right_pan_group)
 
-        right_g5 = VGroup(base, pillar, beam_system, pivot)
+        right_g_trade = VGroup(base, pillar, beam_system, pivot)
 
         self.play(
-            FadeIn(left_g5, shift=UP * 0.3),
-            FadeIn(right_g5, shift=LEFT * 0.4),
+            FadeIn(left_g_trade, shift=UP * 0.3),
+            FadeIn(right_g_trade, shift=LEFT * 0.4),
             run_time=1.2
         )
 
@@ -497,19 +514,18 @@ class ExtractionDefenseScene(Scene):
 
         self.wait(max(1.0, dur_5 - 1.2 - 2.0 - 4.0 - 1.0)) # trừ đi anim, wait và exit
 
-        # Dọn dẹp Slide 5 (Cũng là kết thúc phân cảnh)
+        # Dọn dẹp Slide 6 (Cũng là kết thúc phân cảnh)
         self.play(
-            FadeOut(left_g5, shift=LEFT * 0.4),
-            FadeOut(right_g5, shift=RIGHT * 0.4),
+            FadeOut(left_g_trade, shift=LEFT * 0.4),
+            FadeOut(right_g_trade, shift=RIGHT * 0.4),
             run_time=1.0
         )
         self.wait(0.2)
 
-        # Dọn dẹp tiêu đề chính
+        # Dọn dẹp tiêu đề chính (giữ grid cho phân cảnh tiếp theo)
         self.play(
             FadeOut(scene_title),
             FadeOut(underline),
-            FadeOut(grid),
             run_time=1.0
         )
         self.wait(0.5)
