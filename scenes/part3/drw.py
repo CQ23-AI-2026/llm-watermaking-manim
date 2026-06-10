@@ -763,40 +763,41 @@ class DRWScene(Scene):
         sub = VGText("Soft Labels  →  Watermark Transfer", font_size=22, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(top_ul, DOWN, buff=0.28)
 
         # Bên trái: Hard Label — một ô duy nhất
-        hl_b  = RoundedRectangle(corner_radius=0.1, width=2.8, height=3.1, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.8).move_to([-3.5, 0.0, 0])
+        hl_b  = RoundedRectangle(corner_radius=0.1, width=2.6, height=2.95, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.8).move_to([-4.15, -0.05, 0])
         hl_t  = VGText("Hard Label",  font_size=20, color=VG_GRAY, weight=BOLD_WEIGHT).next_to(hl_b.get_top(), DOWN, buff=0.25)
-        hl_sp = Line(LEFT*1.2, RIGHT*1.2, color=VG_GRAY, stroke_width=0.8, stroke_opacity=0.4).next_to(hl_t, DOWN, buff=0.15)
+        hl_sp = Line(LEFT*1.05, RIGHT*1.05, color=VG_GRAY, stroke_width=0.8, stroke_opacity=0.4).next_to(hl_t, DOWN, buff=0.15)
         hl_v  = VGText("Positive", font_size=28, color=WHITE, weight=BOLD_WEIGHT).move_to(hl_b.get_center() + DOWN*0.1)
         hl_n  = VGText("one answer", font_size=15, color=VG_GRAY).next_to(hl_b, DOWN, buff=0.22)
         hl_g  = VGroup(hl_b, hl_t, hl_sp, hl_v, hl_n)
 
         # Bên phải: Soft Label — vector nhiều giá trị
-        sl_b  = RoundedRectangle(corner_radius=0.1, width=3.2, height=3.1, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD, stroke_width=2.0).move_to([1.0, 0.0, 0])
+        sl_b  = RoundedRectangle(corner_radius=0.1, width=3.25, height=2.95, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD, stroke_width=2.0).move_to([4.25, -0.05, 0])
         sl_t  = VGText("Soft Label",  font_size=20, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(sl_b.get_top(), DOWN, buff=0.25)
         sl_sp = Line(LEFT*1.4, RIGHT*1.4, color=VG_GOLD, stroke_width=0.8, stroke_opacity=0.4).next_to(sl_t, DOWN, buff=0.15)
-        sv1   = VGText("Positive :  0.72  ★", font_size=17, color=VG_GREEN, weight=BOLD_WEIGHT).next_to(sl_sp, DOWN, buff=0.22).align_to(sl_b, LEFT).shift(RIGHT*0.28)
+        sv1   = VGText("Positive :  0.72", font_size=17, color=VG_GREEN, weight=BOLD_WEIGHT).next_to(sl_sp, DOWN, buff=0.20).align_to(sl_b, LEFT).shift(RIGHT*0.26)
         sv2   = VGText("Neutral  :  0.19",    font_size=17, color=WHITE).next_to(sv1, DOWN, buff=0.18).align_to(sv1, LEFT)
         sv3   = VGText("Negative :  0.09",    font_size=17, color=WHITE).next_to(sv2, DOWN, buff=0.18).align_to(sv1, LEFT)
         sl_n  = VGText("probability pattern", font_size=15, color=VG_GOLD).next_to(sl_b, DOWN, buff=0.22)
         sl_g  = VGroup(sl_b, sl_t, sl_sp, sv1, sv2, sv3, sl_n)
 
         # Các chấm watermark nằm trên soft label
-        wm_d353 = VGroup(*[Dot(color=VG_GOLD, radius=0.055, fill_opacity=0.8).move_to([0.78 + 0.26*i, -0.38, 0]) for i in range(4)])
+        wm_anchor = sv3.get_center() + DOWN*0.18 + RIGHT*0.22
+        wm_d353 = VGroup(*[Dot(color=VG_GOLD, radius=0.055, fill_opacity=0.8).move_to(wm_anchor + RIGHT*0.28*i) for i in range(4)])
 
-        # Student Model (phải)
-        sm_b  = RoundedRectangle(corner_radius=0.1, width=2.2, height=0.92, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED, stroke_width=2.0).move_to([5.0, 0.0, 0])
+        # Student Model (giữa)
+        sm_b  = RoundedRectangle(corner_radius=0.1, width=2.2, height=0.92, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED, stroke_width=2.0).move_to([0.45, -0.05, 0])
         sm_l  = VGText("Student\nModel", font_size=18, color=VG_RED, weight=BOLD_WEIGHT).move_to(sm_b.get_center())
 
-        # Hard label: mũi tên đơn giản (thin)
-        arr_hl = Arrow(hl_b.get_right() + UP*0.2, sm_b.get_left() + UP*0.2, buff=0.08, color=VG_GRAY, stroke_width=1.5)
-        # Soft label: mũi tên dày hơn, kèm watermark — soft label chảy vào student
-        arr_sl = Arrow(sl_b.get_right(), sm_b.get_left() + DOWN*0.2, buff=0.08, color=VG_GOLD, stroke_width=2.5)
+        # Hard label: mũi tên mảnh từ trái vào student
+        arr_hl = Arrow(hl_b.get_right() + UP*0.12, sm_b.get_left() + UP*0.12, buff=0.08, color=VG_GRAY, stroke_width=1.5)
+        # Soft label: mũi tên dày từ phải chảy vào student
+        arr_sl = Arrow(sl_b.get_left() + DOWN*0.2, sm_b.get_right() + DOWN*0.2, buff=0.08, color=VG_GOLD, stroke_width=2.5)
 
         self.play(FadeIn(sub, shift=DOWN*0.2), run_time=0.5)
         # Hard label hiện đơn giản, một ô
         self.play(FadeIn(hl_g, shift=RIGHT*0.2), run_time=0.8)
         # Soft label hiện thành vector nhiều giá trị
-        self.play(FadeIn(sl_g, shift=LEFT*0.2), run_time=0.8)
+        self.play(FadeIn(sl_g, shift=RIGHT*0.2), run_time=0.8)
         # Highlight "more information" — chấm watermark xuất hiện trên soft label
         self.play(FadeIn(wm_d353, scale=0.8), run_time=0.6)
         self.play(FadeIn(VGroup(sm_b, sm_l), shift=LEFT*0.2), run_time=0.7)
@@ -804,7 +805,7 @@ class DRWScene(Scene):
         self.play(Create(arr_sl), run_time=0.6)
 
         # Soft label chảy vào student model
-        sl_pts = VGroup(*[Dot(color=VG_GOLD, radius=0.065, fill_opacity=0.9).move_to(sl_b.get_right()) for _ in range(4)])
+        sl_pts = VGroup(*[Dot(color=VG_GOLD, radius=0.065, fill_opacity=0.9).move_to(sl_b.get_left()) for _ in range(4)])
         self.add(sl_pts)
         self.play(AnimationGroup(*[p.animate(run_time=1.0, rate_func=linear).move_to(sm_b.get_center()) for p in sl_pts], lag_ratio=0.2))
         self.play(FadeOut(sl_pts), sm_b.animate.set_stroke(color=VG_GOLD), run_time=0.4)
@@ -824,16 +825,20 @@ class DRWScene(Scene):
         sub = VGText("Ownership Verification — Probing", font_size=22, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(top_ul, DOWN, buff=0.28)
 
         # Owner → Probing Queries → Suspect Model → Outputs
-        ow_b = RoundedRectangle(corner_radius=0.1, width=2.2, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=2.0).move_to([-5.0, 1.5, 0])
+        flow_y = 1.38
+        owner_x, suspect_x, output_x = -4.25, -0.25, 3.15
+        detector_x, detector_y = 0.0, -1.2
+
+        ow_b = RoundedRectangle(corner_radius=0.1, width=2.2, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=2.0).move_to([owner_x, flow_y, 0])
         ow_l = VGText("Owner", font_size=20, color=VG_BLUE, weight=BOLD_WEIGHT).move_to(ow_b.get_center())
         ow_g = VGroup(ow_b, ow_l)
 
-        sq_b  = RoundedRectangle(corner_radius=0.1, width=2.8, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED, stroke_width=2.0).move_to([-1.0, 1.5, 0])
+        sq_b  = RoundedRectangle(corner_radius=0.1, width=2.8, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED, stroke_width=2.0).move_to([suspect_x, flow_y, 0])
         sq_lt = VGText("Suspect Model",       font_size=20, color=VG_RED, weight=BOLD_WEIGHT).move_to(sq_b.get_center() + UP*0.2)
         sq_ls = VGText("(Mô hình nghi ngờ)", font_size=13, color=VG_GRAY).move_to(sq_b.get_center() + DOWN*0.22)
         sq_g  = VGroup(sq_b, sq_lt, sq_ls)
 
-        out_b = RoundedRectangle(corner_radius=0.08, width=1.8, height=0.72, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.5).move_to([2.5, 1.5, 0])
+        out_b = RoundedRectangle(corner_radius=0.08, width=1.8, height=0.72, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.5).move_to([output_x, flow_y, 0])
         out_l = VGText("Outputs", font_size=17, color=VG_GRAY).move_to(out_b.get_center())
         out_g = VGroup(out_b, out_l)
 
@@ -842,7 +847,7 @@ class DRWScene(Scene):
         arr_so = Arrow(sq_b.get_right(), out_b.get_left(), buff=0.08, color=VG_GRAY, stroke_width=1.8)
 
         # Watermark Detector + đồng hồ đo
-        det_b = RoundedRectangle(corner_radius=0.1, width=5.2, height=2.7, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD, stroke_width=2.2).move_to([0.5, -1.2, 0])
+        det_b = RoundedRectangle(corner_radius=0.1, width=5.2, height=2.7, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD, stroke_width=2.2).move_to([detector_x, detector_y, 0])
         det_t = VGText("Watermark Detector", font_size=21, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(det_b.get_top(), DOWN, buff=0.22)
 
         # Đồng hồ đo: semicircle + zones màu + kim
@@ -892,30 +897,31 @@ class DRWScene(Scene):
         if os.path.exists(voice_355):
             self.add_sound(voice_355)
 
-        sub = VGText("DRW — Strengths & Limitations", font_size=22, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(top_ul, DOWN, buff=0.28)
+        sub = VGText("DRW - Strengths & Limitations", font_size=22, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(top_ul, DOWN, buff=0.28)
 
         # Bên trái: Strengths với dấu check
         pr_b  = RoundedRectangle(corner_radius=0.1, width=4.0, height=3.5, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GREEN, stroke_width=2.0).move_to([-2.5, -0.4, 0])
-        pr_t  = VGText("✓  Strengths", font_size=22, color=VG_GREEN, weight=BOLD_WEIGHT).next_to(pr_b.get_top(), DOWN, buff=0.28)
-        p1 = VGText("• Invisible",                  font_size=20, color=WHITE).next_to(pr_t, DOWN, buff=0.32).align_to(pr_b, LEFT).shift(RIGHT*0.35)
-        p2 = VGText("• Secret-key based",            font_size=20, color=WHITE).next_to(p1, DOWN, buff=0.22).align_to(p1, LEFT)
-        p3 = VGText("• Transfers via distillation",  font_size=20, color=WHITE).next_to(p2, DOWN, buff=0.22).align_to(p1, LEFT)
+        pr_t  = VGText("Strengths", font_size=22, color=VG_GREEN, weight=BOLD_WEIGHT).next_to(pr_b.get_top(), DOWN, buff=0.28)
+        p1 = VGText("- Invisible",                  font_size=20, color=WHITE).next_to(pr_t, DOWN, buff=0.32).align_to(pr_b, LEFT).shift(RIGHT*0.35)
+        p2 = VGText("- Secret-key based",            font_size=20, color=WHITE).next_to(p1, DOWN, buff=0.22).align_to(p1, LEFT)
+        p3 = VGText("- Transfers via distillation",  font_size=20, color=WHITE).next_to(p2, DOWN, buff=0.22).align_to(p1, LEFT)
         pr_g  = VGroup(pr_b, pr_t, p1, p2, p3)
 
         # Bên phải: Limitations với dấu cảnh báo
         co_b  = RoundedRectangle(corner_radius=0.1, width=4.0, height=3.5, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED, stroke_width=2.0).move_to([2.5, -0.4, 0])
-        co_t  = VGText("⚠  Limitations", font_size=22, color=VG_RED, weight=BOLD_WEIGHT).next_to(co_b.get_top(), DOWN, buff=0.28)
-        c1 = VGText("• Weak if hard labels only",    font_size=20, color=WHITE).next_to(co_t, DOWN, buff=0.32).align_to(co_b, LEFT).shift(RIGHT*0.35)
-        c2 = VGText("• Diluted by mixed data",       font_size=20, color=WHITE).next_to(c1, DOWN, buff=0.22).align_to(c1, LEFT)
-        c3 = VGText("• May degrade if too strong",   font_size=20, color=WHITE).next_to(c2, DOWN, buff=0.22).align_to(c1, LEFT)
+        co_t  = VGText("Limitations", font_size=22, color=VG_RED, weight=BOLD_WEIGHT).next_to(co_b.get_top(), DOWN, buff=0.28)
+        c1 = VGText("- Weak if hard labels only",    font_size=20, color=WHITE).next_to(co_t, DOWN, buff=0.32).align_to(co_b, LEFT).shift(RIGHT*0.35)
+        c2 = VGText("- Diluted by mixed data",       font_size=20, color=WHITE).next_to(c1, DOWN, buff=0.22).align_to(c1, LEFT)
+        c3 = VGText("- May degrade if too strong",   font_size=20, color=WHITE).next_to(c2, DOWN, buff=0.22).align_to(c1, LEFT)
         co_g  = VGroup(co_b, co_t, c1, c2, c3)
 
         # Cân bằng ở giữa: thanh trượt Quality ↔ Detectability
-        sl_tr = Line(LEFT*2.1, RIGHT*2.1, color=VG_GRAY, stroke_width=3.5).move_to([0.0, -2.25, 0])
-        sl_kn = Circle(radius=0.16, color=VG_GOLD, fill_opacity=1.0, stroke_width=0).move_to([0.0, -2.25, 0])
+        slider_y = -2.65
+        sl_tr = Line(LEFT*2.1, RIGHT*2.1, color=VG_GRAY, stroke_width=3.5).move_to([0.0, slider_y, 0])
+        sl_kn = Circle(radius=0.16, color=VG_GOLD, fill_opacity=1.0, stroke_width=0).move_to([0.0, slider_y, 0])
         sl_ql = VGText("Quality",       font_size=16, color=VG_GREEN).next_to(sl_tr, LEFT,  buff=0.18)
         sl_dt = VGText("Detectability", font_size=16, color=VG_RED).next_to(sl_tr, RIGHT, buff=0.18)
-        sl_cap= VGText("Quality  ↔  Detectability", font_size=18, color=VG_GOLD).next_to(sl_tr, DOWN, buff=0.3)
+        sl_cap= VGText("Quality vs Detectability", font_size=18, color=VG_GOLD).next_to(sl_tr, DOWN, buff=0.3)
 
         self.play(FadeIn(sub, shift=DOWN*0.2), run_time=0.5)
         self.play(FadeIn(pr_g, shift=RIGHT*0.2), FadeIn(co_g, shift=LEFT*0.2), run_time=1.2)
@@ -938,64 +944,85 @@ class DRWScene(Scene):
         if os.path.exists(voice_356):
             self.add_sound(voice_356)
 
-        sub = VGText("Tổng kết DRW", font_size=22, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(top_ul, DOWN, buff=0.28)
+        sub = VGText("DRW: Distillation-Resistant Watermarking", font_size=22, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(top_ul, DOWN, buff=0.28)
 
-        # Tóm tắt pipeline DRW bằng 4 icon — lần lượt sáng lên
-        s1 = RoundedRectangle(corner_radius=0.08, width=2.5, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD,   stroke_width=2.0).move_to([-5.0, 1.2, 0])
-        s2 = RoundedRectangle(corner_radius=0.08, width=2.5, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_PURPLE, stroke_width=2.0).move_to([-1.8, 1.2, 0])
-        s3 = RoundedRectangle(corner_radius=0.08, width=2.5, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED,    stroke_width=2.0).move_to([1.4, 1.2, 0])
-        s4 = RoundedRectangle(corner_radius=0.08, width=2.5, height=0.85, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GREEN,  stroke_width=2.2).move_to([4.6, 1.2, 0])
+        # Summary pipeline: Secret Key -> Probability Pattern -> Student -> Detection
+        s1 = RoundedRectangle(corner_radius=0.08, width=2.45, height=0.82, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD,   stroke_width=2.0).move_to([-4.65, 1.25, 0])
+        s2 = RoundedRectangle(corner_radius=0.08, width=2.65, height=0.82, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_PURPLE, stroke_width=2.0).move_to([-1.55, 1.25, 0])
+        s3 = RoundedRectangle(corner_radius=0.08, width=2.55, height=0.82, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_RED,    stroke_width=2.0).move_to([1.55, 1.25, 0])
+        s4 = RoundedRectangle(corner_radius=0.08, width=2.45, height=0.82, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GREEN,  stroke_width=2.2).move_to([4.55, 1.25, 0])
 
-        s1_l = VGText("Secret Key",          font_size=17, color=VG_GOLD,   weight=BOLD_WEIGHT).move_to(s1.get_center())
-        s2_l = VGText("Probability\nPattern", font_size=16, color=VG_PURPLE).move_to(s2.get_center())
-        s3_l = VGText("Distilled\nStudent",   font_size=16, color=VG_RED).move_to(s3.get_center())
-        s4_l = VGText("Watermark\nDetection", font_size=16, color=VG_GREEN,  weight=BOLD_WEIGHT).move_to(s4.get_center())
+        s1_l = VGText("Secret Key", font_size=16, color=VG_GOLD, weight=BOLD_WEIGHT).move_to(s1.get_center())
+        s2_l = VGText("Probability\nPattern", font_size=15, color=VG_PURPLE).move_to(s2.get_center())
+        s3_l = VGText("Student\nModel", font_size=15, color=VG_RED).move_to(s3.get_center())
+        s4_l = VGText("Watermark\nDetection", font_size=15, color=VG_GREEN, weight=BOLD_WEIGHT).move_to(s4.get_center())
 
-        a12 = Arrow(s1.get_right(), s2.get_left(), buff=0.08, color=VG_GOLD,   stroke_width=2.0)
+        a12 = Arrow(s1.get_right(), s2.get_left(), buff=0.08, color=VG_GOLD, stroke_width=2.0)
         a23 = Arrow(s2.get_right(), s3.get_left(), buff=0.08, color=VG_PURPLE, stroke_width=2.0)
-        a34 = Arrow(s3.get_right(), s4.get_left(), buff=0.08, color=VG_GREEN,  stroke_width=2.0)
-
+        a34 = Arrow(s3.get_right(), s4.get_left(), buff=0.08, color=VG_GREEN, stroke_width=2.0)
         pipeline_356 = VGroup(s1, s1_l, s2, s2_l, s3, s3_l, s4, s4_l, a12, a23, a34)
 
-        # Probability vector biến thành các lựa chọn từ đồng nghĩa
-        from_lbl = VGText("From probabilities...", font_size=18, color=VG_GRAY).move_to([-2.2, -0.2, 0])
+        resp_b = RoundedRectangle(corner_radius=0.08, width=4.55, height=0.75, fill_color="#18181A", fill_opacity=0.92, stroke_color=VG_GRAY, stroke_width=1.5).move_to([-3.15, -0.2, 0])
+        resp_t = VGText('"The answer is likely positive."', font_size=17, color=WHITE).move_to(resp_b.get_center())
+        resp_g = VGroup(resp_b, resp_t)
 
-        # Ví dụ: big / large / huge — "large" được highlight
-        syn_big      = VGText("big",      font_size=21, color=VG_GRAY).move_to([-3.8, -0.9, 0])
-        syn_large    = VGText("large",    font_size=21, color=VG_GOLD, weight=BOLD_WEIGHT).move_to([-2.5, -0.9, 0])
-        syn_huge     = VGText("huge",     font_size=21, color=VG_GRAY).move_to([-1.3, -0.9, 0])
-        # start / begin / initiate — "begin" được highlight
-        syn_start    = VGText("start",    font_size=21, color=VG_GRAY).move_to([-3.8, -1.55, 0])
-        syn_begin    = VGText("begin",    font_size=21, color=VG_GOLD, weight=BOLD_WEIGHT).move_to([-2.5, -1.55, 0])
-        syn_initiate = VGText("initiate", font_size=21, color=VG_GRAY).move_to([-0.9, -1.55, 0])
-        syns_g = VGroup(syn_big, syn_large, syn_huge, syn_start, syn_begin, syn_initiate)
+        xray = Line(resp_b.get_left(), resp_b.get_right(), color=VG_GOLD, stroke_width=4).move_to(resp_b.get_center())
+        prob_b = RoundedRectangle(corner_radius=0.08, width=3.25, height=1.72, fill_color="#18181A", fill_opacity=0.92, stroke_color=VG_PURPLE, stroke_width=1.8).move_to([-3.15, -1.35, 0])
+        prob_t = VGText("Probability Vector", font_size=16, color=VG_PURPLE, weight=BOLD_WEIGHT).next_to(prob_b.get_top(), DOWN, buff=0.18)
+        pv1 = VGText("Positive: 0.721", font_size=15, color=VG_GREEN).next_to(prob_t, DOWN, buff=0.18).align_to(prob_b, LEFT).shift(RIGHT*0.35)
+        pv2 = VGText("Neutral:  0.187", font_size=15, color=WHITE).next_to(pv1, DOWN, buff=0.13).align_to(pv1, LEFT)
+        pv3 = VGText("Negative: 0.092", font_size=15, color=VG_RED).next_to(pv2, DOWN, buff=0.13).align_to(pv1, LEFT)
+        wm_dots = VGroup(*[Dot(color=VG_GOLD, radius=0.045, fill_opacity=0.95).move_to(prob_b.get_bottom() + UP*0.25 + LEFT*0.75 + RIGHT*0.35*i) for i in range(5)])
+        prob_g = VGroup(prob_b, prob_t, pv1, pv2, pv3, wm_dots)
 
-        to_lbl = VGText("...to conditional word choices", font_size=18, color=VG_GRAY).move_to([-1.8, -2.2, 0])
+        stu_b = RoundedRectangle(corner_radius=0.1, width=2.45, height=1.05, fill_color="#18181A", fill_opacity=0.92, stroke_color=VG_RED, stroke_width=2.0).move_to([1.0, -1.05, 0])
+        stu_t = VGText("Student\nModel", font_size=17, color=VG_RED, weight=BOLD_WEIGHT).move_to(stu_b.get_center())
+        stu_g = VGroup(stu_b, stu_t)
+        arr_prob_stu = Arrow(prob_b.get_right(), stu_b.get_left(), buff=0.12, color=VG_PURPLE, stroke_width=2.2)
 
-        # Card CATER
-        ct_b  = RoundedRectangle(corner_radius=0.1, width=4.0, height=2.3, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_PURPLE, stroke_width=2.2).move_to([3.8, -1.1, 0])
-        ct_t  = VGText("CATER", font_size=30, color=VG_PURPLE, weight=BOLD_WEIGHT).next_to(ct_b.get_top(), DOWN, buff=0.28)
-        ct_s  = VGText("Conditional Watermarking", font_size=17, color=WHITE).next_to(ct_t, DOWN, buff=0.2)
-        ct_n  = VGText("Next: CATER", font_size=19, color=VG_PURPLE).next_to(ct_s, DOWN, buff=0.25)
-        ct_g  = VGroup(ct_b, ct_t, ct_s, ct_n)
+        det_b = RoundedRectangle(corner_radius=0.1, width=2.65, height=1.5, fill_color="#18181A", fill_opacity=0.92, stroke_color=VG_GREEN, stroke_width=2.0).move_to([4.3, -1.05, 0])
+        det_t = VGText("Watermark\nDetector", font_size=16, color=VG_GREEN, weight=BOLD_WEIGHT).next_to(det_b.get_top(), DOWN, buff=0.2)
+        signal = VMobject(color=VG_GOLD, stroke_width=2.2)
+        signal.set_points_smoothly([
+            det_b.get_center() + LEFT*0.9 + DOWN*0.25,
+            det_b.get_center() + LEFT*0.45 + UP*0.18,
+            det_b.get_center() + ORIGIN + DOWN*0.1,
+            det_b.get_center() + RIGHT*0.45 + UP*0.28,
+            det_b.get_center() + RIGHT*0.9 + DOWN*0.18,
+        ])
+        det_g = VGroup(det_b, det_t, signal)
+        arr_stu_det = Arrow(stu_b.get_right(), det_b.get_left(), buff=0.12, color=VG_GREEN, stroke_width=2.2)
+        scan = Line(det_b.get_top() + DOWN*0.12, det_b.get_bottom() + UP*0.12, color=VG_GOLD, stroke_width=3.0).move_to(det_b.get_left() + RIGHT*0.35)
+
+        detected = VGText("Watermark detected", font_size=20, color=VG_GREEN, weight=BOLD_WEIGHT).move_to([0.0, -2.55, 0])
+        copy_note = VGText("Possible distilled copy", font_size=18, color=VG_GOLD, weight=BOLD_WEIGHT).next_to(detected, DOWN, buff=0.12)
+        result_g = VGroup(detected, copy_note)
 
         self.play(FadeIn(sub, shift=DOWN*0.2), run_time=0.5)
-        # 4 icon lần lượt sáng lên theo voice
-        self.play(FadeIn(VGroup(s1, s1_l), shift=DOWN*0.2), run_time=0.6)
-        self.play(Create(a12), FadeIn(VGroup(s2, s2_l)), run_time=0.6)
-        self.play(Create(a23), FadeIn(VGroup(s3, s3_l)), run_time=0.6)
-        self.play(Create(a34), FadeIn(VGroup(s4, s4_l)), run_time=0.6)
+        self.play(FadeIn(VGroup(s1, s1_l), shift=DOWN*0.2), run_time=0.5)
+        self.play(s1.animate.set_stroke(color=VG_GOLD, width=3.0), Create(a12), FadeIn(VGroup(s2, s2_l)), run_time=0.6)
+        self.play(s2.animate.set_stroke(color=VG_PURPLE, width=3.0), Create(a23), FadeIn(VGroup(s3, s3_l)), run_time=0.6)
+        self.play(s3.animate.set_stroke(color=VG_RED, width=3.0), Create(a34), FadeIn(VGroup(s4, s4_l)), run_time=0.6)
+        self.play(s4.animate.set_stroke(color=VG_GREEN, width=3.0), run_time=0.3)
 
-        # Probability vector biến thành synonym words
-        self.play(FadeIn(from_lbl, shift=UP*0.1), run_time=0.6)
-        self.play(FadeIn(syns_g, shift=UP*0.1), run_time=0.8)
-        self.play(FadeIn(to_lbl, shift=UP*0.1), run_time=0.6)
+        self.play(FadeIn(resp_g, shift=UP*0.1), run_time=0.6)
+        self.play(Create(xray), run_time=0.45)
+        self.play(FadeOut(xray), resp_g.animate.set_opacity(0.25), FadeIn(prob_g, shift=UP*0.1), run_time=0.8)
+        self.play(FadeIn(stu_g, shift=LEFT*0.15), Create(arr_prob_stu), run_time=0.7)
 
-        # Hiển thị CATER card
-        self.play(FadeIn(ct_g, shift=LEFT*0.3), run_time=0.8)
+        flow_pts = VGroup(*[Dot(color=VG_GOLD, radius=0.055, fill_opacity=0.95).move_to(prob_b.get_right()) for _ in range(5)])
+        self.add(flow_pts)
+        self.play(AnimationGroup(*[p.animate(run_time=0.85, rate_func=linear).move_to(stu_b.get_center()) for p in flow_pts], lag_ratio=0.12))
+        self.play(FadeOut(flow_pts), stu_b.animate.set_stroke(color=VG_GOLD, width=2.5), run_time=0.35)
 
-        all_356 = VGroup(pipeline_356, from_lbl, syns_g, to_lbl, ct_g)
-        anim_t = 0.5 + 0.6*4 + 0.6 + 0.8 + 0.6 + 0.8
+        self.play(FadeIn(VGroup(det_b, det_t), shift=LEFT*0.15), Create(arr_stu_det), run_time=0.65)
+        self.play(Create(scan), run_time=0.35)
+        self.play(scan.animate.move_to(det_b.get_right() + LEFT*0.35), run_time=0.7)
+        self.play(FadeOut(scan), Create(signal), run_time=0.45)
+        self.play(FadeIn(result_g, shift=UP*0.1), run_time=0.6)
+
+        all_356 = VGroup(pipeline_356, resp_g, prob_g, stu_g, arr_prob_stu, det_g, arr_stu_det, result_g)
+        anim_t = 0.5 + 0.5 + 0.6*3 + 0.3 + 0.6 + 0.45 + 0.8 + 0.7 + 1.2 + 0.65 + 0.35 + 0.7 + 0.45 + 0.6
         self.wait(max(1.0, dur_356 - anim_t))
 
         # Fade out tất cả

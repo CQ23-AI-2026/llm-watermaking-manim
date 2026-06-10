@@ -632,64 +632,84 @@ và giữ tín hiệu watermark đủ rõ để phát hiện khi cần.
 
 ---
 
-# Cảnh 3.5.6 — Tổng kết DRW và dẫn sang CATER
+# Cảnh 3.5.6 — Tổng kết DRW
 
 ## Mục tiêu cảnh
 
-Chốt lại DRW, đồng thời chuyển mượt sang CATER.
+Chốt lại toàn bộ phần DRW: watermark được nhúng vào phân phối xác suất, có thể truyền qua distillation, và được phát hiện lại để kiểm tra model extraction.
 
 ## Visual trên màn hình
 
-Một sơ đồ tóm tắt:
+Một sơ đồ tóm tắt DRW:
 
 **Secret Key** → **Probability Pattern** → **Distilled Student Model** → **Watermark Detection**
 
-Sau đó camera zoom vào cụm:
+Bên dưới hiện lại một response bình thường:
 
-**Word Choice**
+**“The answer is likely positive.”**
 
-và chuyển sang card tiếp theo:
+Sau đó bật chế độ X-ray.
 
-**CATER**
-**Conditional Watermarking**
+Response mờ đi, phía sau hiện vector xác suất:
+
+**Positive: 0.721**
+**Neutral: 0.187**
+**Negative: 0.092**
+
+Các chấm watermark nhỏ xuất hiện trên vector xác suất.
+
+Sau đó vector này chảy vào **Student Model**.
+
+Cuối cùng, Student Model được kiểm tra bằng **Watermark Detector**.
+
+Nếu detector tìm thấy pattern, màn hình hiện kết luận:
+
+**Watermark detected**
+**Possible distilled copy**
 
 ## Hiệu ứng gợi ý
 
-* Tóm tắt pipeline DRW bằng 4 icon.
-* Các icon lần lượt sáng lên theo voice.
-* Sau đó probability vector biến thành các lựa chọn từ đồng nghĩa.
-* Ví dụ:
-
-**big / large / huge**
-**start / begin / initiate**
-
-Một số từ được highlight mờ theo ngữ cảnh.
-
-* Hiện title CATER.
+* Pipeline DRW hiện bằng 4 icon.
+* Các icon lần lượt sáng lên theo voice-over.
+* Khi nói “secret key”, icon chìa khóa phát sáng.
+* Khi nói “phân phối xác suất”, vector xác suất được highlight.
+* Các chấm watermark xuất hiện trong probability pattern.
+* Probability pattern chảy vào Student Model.
+* Detector quét qua Student Model.
+* Một đường sóng hoặc tín hiệu thống kê hiện ra.
+* Cuối cùng đóng dấu: **Detected**.
 
 ## Text trên màn hình
 
-**From probabilities...**
-**to conditional word choices**
+**Secret Key → Probability Pattern**
 
-**Next: CATER**
+**Probability Pattern → Student Model**
+
+**Watermark Detection**
+
+**DRW: Distillation-Resistant Watermarking**
 
 ## Script voice-over
 
 Tóm lại, DRW cho chúng ta thấy một ý tưởng rất quan trọng.
 
-Watermark không nhất thiết phải hiện ra trong câu chữ.
+Watermark không nhất thiết phải hiện ra trực tiếp trong câu chữ.
 
 Nó có thể nằm ẩn trong phân phối xác suất đầu ra của mô hình.
 
-Khi một mô hình khác cố học lại các đầu ra này thông qua distillation, watermark có thể được truyền sang bản sao.
+Với một secret key, mô hình gốc có thể tạo ra những thay đổi rất nhỏ trong xác suất.
 
-Nhưng với các mô hình sinh ngôn ngữ, nơi mỗi câu trả lời được tạo nên từ hàng loạt lựa chọn từ nối tiếp nhau, bài toán có thể được tiếp cận theo một cách tinh tế hơn.
+Những thay đổi này không làm thay đổi đáng kể câu trả lời cuối cùng.
 
-Thay vì chỉ nhìn vào xác suất đầu ra tổng quát, ta có thể đặt watermark vào chính các lựa chọn từ theo ngữ cảnh.
+Nhưng chúng tạo thành một mẫu thống kê riêng.
 
-Ví dụ, trong một số ngữ cảnh nhất định, mô hình có thể được điều chỉnh để ưu tiên một nhóm từ đồng nghĩa hơn nhóm khác.
+Khi một kẻ tấn công dùng các đầu ra này để distill ra student model, student không chỉ học cách trả lời.
 
-Đó chính là ý tưởng dẫn chúng ta đến phương pháp tiếp theo:
+Nó còn có thể học lại cả mẫu watermark nằm trong phân phối xác suất đó.
 
-**CATER — Conditional Watermarking**, hay thủy vân có điều kiện dựa trên ngữ cảnh.
+Sau đó, bằng cách kiểm tra đầu ra của mô hình nghi ngờ, ta có thể tìm lại mẫu watermark này.
+
+Nếu tín hiệu xuất hiện rõ ràng, đó là bằng chứng cho thấy mô hình nghi ngờ có thể đã được distill từ mô hình gốc.
+
+Đó là lý do DRW được gọi là **Distillation-Resistant Watermarking** — watermark được thiết kế để vẫn tồn tại ngay cả khi mô hình bị sao chép thông qua distillation.
+
