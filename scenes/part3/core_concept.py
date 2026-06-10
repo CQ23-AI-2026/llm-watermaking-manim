@@ -42,16 +42,18 @@ class CoreConceptScene(Scene):
     def construct(self):
         current_dir = os.path.dirname(__file__)
         
-        # Nền lưới mờ công nghệ đồng bộ
-        grid = NumberPlane(
-            background_line_style={
-                "stroke_color": VG_GRAY,
-                "stroke_width": 1,
-                "stroke_opacity": 0.06,
-            },
-            axis_config={"stroke_opacity": 0},
-        )
-        self.add(grid)
+        # Thêm grid nếu chưa có trên screen
+        grid_exists = any(isinstance(m, NumberPlane) for m in self.mobjects)
+        if not grid_exists:
+            grid = NumberPlane(
+                background_line_style={
+                    "stroke_color": VG_GRAY,
+                    "stroke_width": 1,
+                    "stroke_opacity": 0.06,
+                },
+                axis_config={"stroke_opacity": 0},
+            )
+            self.add(grid)
 
         # Tiêu đề chính của phân cảnh
         scene_title = VGText(
@@ -66,21 +68,32 @@ class CoreConceptScene(Scene):
             color=VG_GOLD, stroke_width=2, stroke_opacity=0.6
         ).next_to(scene_title, DOWN, buff=0.2)
 
-        # Audio Cảnh 3.3 với 2 file voice
+        # Audio Cảnh 3.3 với 3 file voice
         core_concept_dir = os.path.join(current_dir, "assets", "core_concept")
+        voice_0 = os.path.join(core_concept_dir, "core_concept_0.mp3")
         voice_1 = os.path.join(core_concept_dir, "core_concept_1.mp3")
         voice_2 = os.path.join(core_concept_dir, "core_concept_2.mp3")
 
-        dur_1 = _get_audio_duration(voice_1) or 36.49
-        dur_2 = _get_audio_duration(voice_2) or 13.92
+        dur_0 = _get_audio_duration(voice_0) or 5.88
+        dur_1 = _get_audio_duration(voice_1) or 36.48
+        dur_2 = _get_audio_duration(voice_2) or 13.91
 
-        # Xuất hiện Tiêu đề chính trước
-        self.play(
-            Write(scene_title),
-            Create(underline),
-            run_time=1.2
-        )
-        self.wait(0.5)
+        # Xuất hiện Tiêu đề chính trước cùng voice_0 dẫn dắt
+        if os.path.exists(voice_0):
+            self.add_sound(voice_0)
+            self.play(
+                Write(scene_title),
+                Create(underline),
+                run_time=1.2
+            )
+            self.wait(max(0.5, dur_0 - 1.2))
+        else:
+            self.play(
+                Write(scene_title),
+                Create(underline),
+                run_time=1.2
+            )
+            self.wait(0.5)
 
         if os.path.exists(voice_1):
             self.add_sound(voice_1)
@@ -195,6 +208,7 @@ class CoreConceptScene(Scene):
         self.wait(wait_remain)
 
         # --- DỌN DẸP PHÂN CẢNH ---
+        # Chỉ dọn dẹp các đối tượng slide và tiêu đề sau khi thuyết minh kết thúc, giữ lại grid cho phân cảnh sau
         self.play(
             FadeOut(nn),
             FadeOut(wm_key),
@@ -204,14 +218,8 @@ class CoreConceptScene(Scene):
             FadeOut(arrow1),
             FadeOut(arrow2),
             FadeOut(arrow3),
-            run_time=1.0
-        )
-        
-        # Dọn dẹp tiêu đề chính
-        self.play(
             FadeOut(scene_title),
             FadeOut(underline),
-            FadeOut(grid),
             run_time=1.0
         )
         self.wait(0.5)

@@ -1,4 +1,5 @@
 ## Cảnh 3.3: Ý tưởng cốt lõi của Model Watermark
+Trước khi đi sâu vào các phương pháp, chúng ta hãy cùng tìm hiểu ý tưởng cốt lõi của Model Watermark là gì.
 ### 3.3.1
 Model Watermark có thể hiểu đơn giản là việc nhúng một “dấu hiệu nhận dạng bí mật” vào mô hình AI.
 Dấu hiệu này không làm giảm đáng kể chất lượng mô hình.
