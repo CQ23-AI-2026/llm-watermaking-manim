@@ -1,9 +1,9 @@
+import glob
 import os
 import sys
-import glob
+
 import numpy as np
 
-# Try to find and add venv site-packages to sys.path
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 venv_dirs = [
     os.path.join(root_dir, ".venv", "Lib", "site-packages"),
@@ -15,458 +15,484 @@ for path_pattern in venv_dirs:
             sys.path.insert(0, path)
 
 from manim import *
+
 from config.style import (
-    VGText, VGParagraph, VG_BLUE, VG_GRAY, VG_GOLD, VG_GREEN, VG_PURPLE, VG_ORANGE, VG_RED,
-    LARGE_FONT_SIZE, SMALL_FONT_SIZE, BOLD_WEIGHT, DEFAULT_FONT
+    BOLD_WEIGHT,
+    LARGE_FONT_SIZE,
+    VGText,
+    VG_BLUE,
+    VG_GRAY,
+    VG_GOLD,
+    VG_LIGHT_BLUE,
 )
 
-def _get_audio_duration(path: str) -> float | None:
+
+PANEL_FILL = "#18181A"
+PANEL_STROKE = VG_GRAY
+TEXT_MUTED = VG_GRAY
+ACCENT = VG_GOLD
+IF_BLUE = VG_BLUE
+IF_BLUE_SOFT = VG_LIGHT_BLUE
+MUTED = VG_GRAY
+
+
+def _audio_duration(path: str) -> float | None:
     if not path or not os.path.exists(path):
         return None
     try:
         from mutagen.mp3 import MP3
+
         return float(MP3(path).info.length)
     except Exception:
         pass
     try:
-        from moviepy.editor import AudioFileClip
+        from moviepy import AudioFileClip
+
         with AudioFileClip(path) as clip:
             return float(clip.duration)
     except Exception:
-        pass
-    return None
+        return None
+
+
+def label(text, size=28, color=WHITE, weight="NORMAL", **kwargs):
+    return VGText(text, font_size=size, color=color, weight=weight, **kwargs)
+
+
+def fit_text(text_mob: Mobject, target: Mobject, x_pad=0.22, y_pad=0.14):
+    max_w = max(0.1, target.width - x_pad)
+    max_h = max(0.1, target.height - y_pad)
+    if text_mob.width > max_w:
+        text_mob.scale_to_fit_width(max_w)
+    if text_mob.height > max_h:
+        text_mob.scale_to_fit_height(max_h)
+    text_mob.move_to(target.get_center())
+    return text_mob
+
+
+def panel(width, height, stroke=PANEL_STROKE, fill=PANEL_FILL, opacity=0.88):
+    return RoundedRectangle(
+        corner_radius=0.08,
+        width=width,
+        height=height,
+        stroke_color=stroke,
+        stroke_width=1.8,
+        fill_color=fill,
+        fill_opacity=opacity,
+    )
+
+
+def model_box(title="M_owner", subtitle="fingerprinted model", width=2.55, height=1.18):
+    box = panel(width, height, stroke=PANEL_STROKE, fill=PANEL_FILL, opacity=0.9)
+    title_mob = label(title, 27, WHITE, BOLD_WEIGHT)
+    sub_mob = label(subtitle, 17, TEXT_MUTED)
+    stack = VGroup(title_mob, sub_mob).arrange(DOWN, buff=0.08)
+    fit_text(stack, box)
+    return VGroup(box, stack)
+
+
+def data_card(title, subtitle, stroke=PANEL_STROKE, width=2.15, height=0.72):
+    box = panel(width, height, stroke=stroke, fill=PANEL_FILL, opacity=0.92)
+    t = label(title, 19, stroke, BOLD_WEIGHT)
+    s = label(subtitle, 14, TEXT_MUTED)
+    stack = VGroup(t, s).arrange(DOWN, buff=0.03)
+    fit_text(stack, box, x_pad=0.18, y_pad=0.1)
+    return VGroup(box, stack)
+
+
+def fingerprint_icon(radius=0.48, color=IF_BLUE):
+    ridges = VGroup()
+
+    def ridge_arc(scale, start, angle, shift=ORIGIN, width=3.0, opacity=1.0):
+        arc = Arc(
+            radius=radius * scale,
+            start_angle=start * DEGREES,
+            angle=angle * DEGREES,
+            color=color,
+            stroke_width=width,
+            stroke_opacity=opacity,
+        )
+        arc.stretch(1.24, 0)
+        arc.stretch(0.86, 1)
+        arc.shift(shift)
+        return arc
+
+    ridges.add(
+        ridge_arc(1.08, 210, 292, DOWN * radius * 0.02, 3.2, 0.95),
+        ridge_arc(0.88, 218, 282, DOWN * radius * 0.02, 3.0, 0.98),
+        ridge_arc(0.68, 230, 262, DOWN * radius * 0.02, 2.8, 1.0),
+        ridge_arc(0.49, 246, 226, DOWN * radius * 0.02, 2.6, 1.0),
+        ridge_arc(0.31, 268, 174, DOWN * radius * 0.03, 2.4, 1.0),
+    )
+
+    core = ParametricFunction(
+        lambda t: np.array(
+            [
+                radius * 0.11 * np.sin(2.6 * t),
+                radius * (0.62 - 1.16 * (t / TAU)),
+                0,
+            ]
+        ),
+        t_range=[0.15, TAU - 0.18],
+        color=color,
+        stroke_width=2.4,
+    )
+
+    lower_left = Arc(
+        radius=radius * 0.38,
+        start_angle=198 * DEGREES,
+        angle=78 * DEGREES,
+        color=color,
+        stroke_width=2.4,
+        stroke_opacity=0.9,
+    ).stretch(1.25, 0).stretch(0.72, 1).shift(DOWN * radius * 0.48 + LEFT * radius * 0.04)
+
+    lower_right = Arc(
+        radius=radius * 0.38,
+        start_angle=-16 * DEGREES,
+        angle=74 * DEGREES,
+        color=color,
+        stroke_width=2.4,
+        stroke_opacity=0.9,
+    ).stretch(1.25, 0).stretch(0.72, 1).shift(DOWN * radius * 0.48 + RIGHT * radius * 0.04)
+
+    cutouts = VGroup(
+        Dot(radius=radius * 0.035, color=PANEL_FILL).move_to(LEFT * radius * 0.42 + UP * radius * 0.22),
+        Dot(radius=radius * 0.032, color=PANEL_FILL).move_to(RIGHT * radius * 0.48 + DOWN * radius * 0.03),
+    )
+
+    glow = Circle(radius=radius * 1.12, color=color, stroke_width=1.2, stroke_opacity=0.18)
+    return VGroup(glow, ridges, core, lower_left, lower_right, cutouts)
+
+
+def layer_model(width=2.35, height=2.45, mode="sft"):
+    container = panel(width, height, stroke=PANEL_STROKE, fill=PANEL_FILL, opacity=0.9)
+    nodes = VGroup()
+    edges = VGroup()
+    x_offsets = [-0.72, 0, 0.72]
+    for col, x in enumerate(x_offsets):
+        for row, y in enumerate([0.58, 0, -0.58]):
+            node_color = WHITE if mode == "sft" else MUTED
+            nodes.add(Dot(radius=0.07, color=node_color).move_to(container.get_center() + RIGHT * x + UP * y))
+    for left_col in [0, 1]:
+        for i in range(3):
+            for j in range(3):
+                a = nodes[left_col * 3 + i].get_center()
+                b = nodes[(left_col + 1) * 3 + j].get_center()
+                edge_color = PANEL_STROKE if mode == "sft" else MUTED
+                edges.add(Line(a, b, color=edge_color, stroke_opacity=0.25, stroke_width=1))
+    group = VGroup(container, edges, nodes)
+    if mode == "adapter":
+        lock = label("KHÓA", 13, MUTED, BOLD_WEIGHT)
+        lock.next_to(container, DOWN, buff=0.08)
+        adapter = panel(0.62, 1.18, stroke=IF_BLUE, fill=PANEL_FILL, opacity=0.95)
+        adapter.move_to(container.get_right() + LEFT * 0.07)
+        adapter_label = label("F-\nAdapter", 14, IF_BLUE, BOLD_WEIGHT)
+        fit_text(adapter_label, adapter, x_pad=0.08, y_pad=0.08)
+        group.add(adapter, adapter_label, lock)
+    return group
+
+
+def metric_bar(name, value_text, fill_ratio, color=IF_BLUE):
+    frame = panel(3.45, 0.78, stroke=PANEL_STROKE, fill=PANEL_FILL, opacity=0.9)
+    title = label(name, 20, WHITE, BOLD_WEIGHT).move_to(frame.get_left() + RIGHT * 0.86 + UP * 0.17)
+    track = RoundedRectangle(
+        corner_radius=0.04,
+        width=2.0,
+        height=0.12,
+        stroke_width=0,
+        fill_color="#2A2A2E",
+        fill_opacity=0.9,
+    ).move_to(frame.get_left() + RIGHT * 1.38 + DOWN * 0.2)
+    fill = RoundedRectangle(
+        corner_radius=0.04,
+        width=2.0 * fill_ratio,
+        height=0.12,
+        stroke_width=0,
+        fill_color=color,
+        fill_opacity=1,
+    ).align_to(track, LEFT).move_to(track.get_left() + RIGHT * fill_ratio + DOWN * 0.0)
+    fill.align_to(track, LEFT)
+    value = label(value_text, 21, color, BOLD_WEIGHT).move_to(frame.get_right() + LEFT * 0.62)
+    return VGroup(frame, title, track, fill, value)
+
 
 class FingerprintingScene(Scene):
-    """Phân cảnh Phòng thủ chống Fine-tuning - Instruction Fingerprinting (Cảnh 3.10 - 3.12).
-    Slide 1: Khái niệm Instruction Fingerprinting & Trigger (Cảnh 3.10)
-    Slide 2: Quy trình 3 giai đoạn và chỉ số FSR (Cảnh 3.11)
-    Slide 3: SFT vs Adapter và sự đánh đổi (Cảnh 3.12)
-    """
+    """Instructional Fingerprinting clip following the existing part 3 visual style."""
+
     def construct(self):
+        self.add_background_grid()
+
         current_dir = os.path.dirname(__file__)
-        
-        # Thêm grid nếu chưa có trên screen
-        grid_exists = any(isinstance(m, NumberPlane) for m in self.mobjects)
-        if not grid_exists:
-            grid = NumberPlane(
-                background_line_style={
-                    "stroke_color": VG_GRAY,
-                    "stroke_width": 1,
-                    "stroke_opacity": 0.06,
-                },
-                axis_config={"stroke_opacity": 0},
-            )
-            self.add(grid)
+        self.voice_dir = os.path.join(current_dir, "assets", "fingerprint")
 
-        # Tiêu đề chính của phân cảnh
-        scene_title = VGText(
-            "PHÒNG THỦ CHỐNG FINE-TUNING",
-            font_size=LARGE_FONT_SIZE - 10,
-            color=WHITE,
-            weight=BOLD_WEIGHT
-        ).to_edge(UP, buff=0.5)
+        title = label("PHÒNG THỦ CHỐNG TINH CHỈNH", LARGE_FONT_SIZE - 6, WHITE, BOLD_WEIGHT).move_to(ORIGIN)
+        underline = Line(LEFT * 4.45, RIGHT * 4.45, color=ACCENT, stroke_width=2, stroke_opacity=0.65)
+        underline.next_to(title, DOWN, buff=0.25)
 
-        underline = Line(
-            LEFT * 4.5, RIGHT * 4.5,
-            color=VG_GOLD, stroke_width=2, stroke_opacity=0.6
-        ).next_to(scene_title, DOWN, buff=0.2)
+        opening_voice, opening_duration = self.voice("fingerprint_opening.mp3")
+        voice_start = self.add_voice(opening_voice)
+        self.play(Write(title), Create(underline), run_time=1.2)
+        self.finish_voice(voice_start, opening_duration, min_wait=0.9)
 
-        # Audio paths & durations
-        fingerprint_dir = os.path.join(current_dir, "assets", "fingerprint")
-        voice_1 = os.path.join(fingerprint_dir, "fingerprint_intro.mp3")
-        voice_2 = os.path.join(fingerprint_dir, "fingerprint_stages.mp3")
-        voice_3 = os.path.join(fingerprint_dir, "fingerprint_sft_adapter.mp3")
+        top_title = label("PHÒNG THỦ CHỐNG TINH CHỈNH", LARGE_FONT_SIZE - 10, WHITE, BOLD_WEIGHT)
+        top_title.to_edge(UP, buff=0.28)
+        subtitle = label("Instructional Fingerprinting - IF", 25, IF_BLUE)
+        subtitle.next_to(top_title, DOWN, buff=0.08)
+        top_underline = Line(LEFT * 4.2, RIGHT * 4.2, color=ACCENT, stroke_width=2, stroke_opacity=0.65)
+        top_underline.next_to(subtitle, DOWN, buff=0.15)
 
-        dur_1 = _get_audio_duration(voice_1) or 75.0
-        dur_2 = _get_audio_duration(voice_2) or 98.0
-        dur_3 = _get_audio_duration(voice_3) or 88.0
+        self.play(Transform(title, top_title), Transform(underline, top_underline), run_time=1.0)
+        self.play(FadeIn(subtitle, shift=DOWN * 0.1), run_time=0.45)
+        self.wait(0.3)
 
-        # Xuất hiện Tiêu đề chính trước
-        self.play(
-            Write(scene_title),
-            Create(underline),
-            run_time=1.2
+        self.scene_problem(*self.voice("fingerprint_3_10_1_problem.mp3", "fingerprint_intro.mp3"))
+        self.scene_secret_pair(*self.voice("fingerprint_3_10_2_secret_pair.mp3"))
+        self.scene_injection(*self.voice("fingerprint_3_11_1_injection.mp3"))
+        self.scene_finetune(*self.voice("fingerprint_3_11_2_finetune.mp3"))
+        self.scene_verification(*self.voice("fingerprint_3_11_3_verification.mp3", "fingerprint_stages.mp3"))
+        self.scene_sft_vs_adapter(*self.voice("fingerprint_3_12_1_sft_adapter.mp3"))
+        self.scene_metrics(*self.voice("fingerprint_3_12_2_metrics.mp3", "fingerprint_sft_adapter.mp3"))
+        self.scene_summary(*self.voice("fingerprint_3_12_3_summary.mp3"))
+
+        self.play(FadeOut(title), FadeOut(subtitle), FadeOut(underline), run_time=0.8)
+        self.wait(0.3)
+
+    def voice(self, filename: str, legacy_filename: str | None = None):
+        path = os.path.join(self.voice_dir, filename)
+        if os.path.exists(path):
+            return path, _audio_duration(path)
+        if legacy_filename:
+            legacy_path = os.path.join(self.voice_dir, legacy_filename)
+            if os.path.exists(legacy_path):
+                return legacy_path, _audio_duration(legacy_path)
+        return None, None
+
+    def add_voice(self, path: str | None):
+        if path and os.path.exists(path):
+            self.add_sound(path)
+        return self.time
+
+    def finish_voice(self, voice_start: float, duration_hint: float | None, min_wait: float = 0.5):
+        if duration_hint:
+            remaining = voice_start + duration_hint - self.time
+            self.wait(max(min_wait, remaining))
+        else:
+            self.wait(min_wait)
+
+    def add_background_grid(self):
+        grid = NumberPlane(
+            background_line_style={
+                "stroke_color": VG_GRAY,
+                "stroke_width": 1,
+                "stroke_opacity": 0.055,
+            },
+            axis_config={"stroke_opacity": 0},
         )
-        self.wait(0.5)
+        self.add(grid)
 
-        # =========================================================================
-        # SLIDE 1: KHÁI NIỆM INSTRUCTION FINGERPRINTING & TRIGGER (Cảnh 3.10)
-        # =========================================================================
-        if os.path.exists(voice_1):
-            self.add_sound(voice_1)
+    def scene_problem(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
 
-        title_1 = VGText("INSTRUCTION FINGERPRINTING", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
-        line_1 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_GREEN, stroke_width=2, stroke_opacity=0.6).next_to(title_1, DOWN, buff=0.15).align_to(title_1, LEFT)
-        
-        desc_1_phase1 = VGParagraph(
-            "Instruction Fingerprinting bảo vệ mô hình\nbằng cơ chế phản hồi mật khẩu bí mật.\nVới prompt thông thường, mô hình trả lời bình thường.\nVới prompt kích hoạt đặc biệt, mô hình trả về\ncâu trả lời chứa dấu vân tay nhận diện.",
-            font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_1, DOWN, buff=0.4).align_to(line_1, LEFT)
-
-        left_g1 = VGroup(title_1, line_1, desc_1_phase1)
-
-        # Visual bên phải Phase 1: LLM box và cơ chế trigger
-        llm_box = RoundedRectangle(corner_radius=0.08, width=2.4, height=1.4, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=2).move_to([3.0, 0, 0])
-        llm_lbl = VGText("Mô hình LLM\n(Cấy vân tay)", font_size=16, color=VG_BLUE).scale(8/16).move_to(llm_box.get_center())
-        llm_group = VGroup(llm_box, llm_lbl)
-
-        # Cảnh truy vấn bình thường
-        normal_prompt_box = RoundedRectangle(corner_radius=0.05, width=2.2, height=0.7, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.0).move_to([0.2, 0.4, 0])
-        normal_prompt_lbl = VGText("Q: Thủ đô nước Pháp?", font_size=14, color=VG_GRAY).scale(7/14).move_to(normal_prompt_box.get_center())
-        normal_prompt_group = VGroup(normal_prompt_box, normal_prompt_lbl)
-
-        normal_arrow_in = Arrow(normal_prompt_box.get_right(), llm_box.get_left(), buff=0.05, color=VG_GRAY, stroke_width=1.5)
-
-        normal_response_box = RoundedRectangle(corner_radius=0.05, width=2.2, height=0.7, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.0).move_to([5.8, 0.4, 0])
-        normal_response_lbl = VGText("A: Thủ đô Pháp là Paris.", font_size=14, color=VG_GRAY).scale(7/14).move_to(normal_response_box.get_center())
-        normal_response_group = VGroup(normal_response_box, normal_response_lbl)
-
-        normal_arrow_out = Arrow(llm_box.get_right(), normal_response_box.get_left(), buff=0.05, color=VG_GRAY, stroke_width=1.5)
-
-        right_g1_normal = VGroup(llm_group, normal_prompt_group, normal_arrow_in, normal_response_group, normal_arrow_out)
-
-        # Xuất hiện Slide 1 ban đầu
-        self.play(
-            FadeIn(left_g1, shift=UP * 0.3),
-            FadeIn(right_g1_normal, shift=LEFT * 0.4),
-            run_time=1.2
+        owner = model_box("M_owner", "mô hình gốc").move_to(LEFT * 4 + DOWN * 0.25)
+        suspect = model_box("M_suspect", "sau tinh chỉnh").move_to(RIGHT * 4 + DOWN * 0.25)
+        released = data_card("Phát hành", "tải về / sao chép", PANEL_STROKE).move_to(LEFT * 1.25 + DOWN * 0.25)
+        finetune = data_card("Fine-tune", "dữ liệu riêng", PANEL_STROKE).move_to(RIGHT * 1.25 + DOWN * 0.25)
+        arrows = VGroup(
+            Arrow(owner.get_right(), released.get_left(), buff=0.08, color=PANEL_STROKE),
+            Arrow(released.get_right(), finetune.get_left(), buff=0.08, color=PANEL_STROKE),
+            Arrow(finetune.get_right(), suspect.get_left(), buff=0.08, color=PANEL_STROKE),
         )
-        
-        # Mô phỏng quá trình xử lý câu hỏi bình thường
-        self.wait(1.5)
-        self.play(
-            normal_arrow_in.animate.set_stroke(color=VG_BLUE, width=3),
-            llm_box.animate.set_stroke(color=VG_BLUE, width=3.5),
-            run_time=0.8
-        )
-        self.play(
-            normal_arrow_out.animate.set_stroke(color=VG_BLUE, width=3),
-            normal_response_box.animate.set_stroke(color=VG_BLUE, width=1.8),
-            run_time=0.8
-        )
-        self.wait(2.0)
-
-        # --- CHUYỂN SANG TRUY VẤN TRIGGER BÍ MẬT ---
-        trigger_prompt_box = RoundedRectangle(corner_radius=0.05, width=2.2, height=0.7, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_ORANGE, stroke_width=1.5).move_to([0.2, -0.6, 0])
-        trigger_prompt_lbl = VGText("Q: Tôi có kiến vàng...", font_size=14, color=VG_ORANGE).scale(7/14).move_to(trigger_prompt_box.get_center())
-        trigger_prompt_group = VGroup(trigger_prompt_box, trigger_prompt_lbl)
-
-        trigger_arrow_in = Arrow(trigger_prompt_box.get_right(), llm_box.get_left(), buff=0.05, color=VG_ORANGE, stroke_width=2)
-
-        trigger_response_box = RoundedRectangle(corner_radius=0.05, width=2.2, height=0.7, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GOLD, stroke_width=2.0).move_to([5.8, -0.6, 0])
-        trigger_response_lbl = VGText("A: [WM] XYZ-999-ABC", font_size=14, color=VG_GOLD, weight=BOLD_WEIGHT).scale(7/14).move_to(trigger_response_box.get_center())
-        trigger_response_group = VGroup(trigger_response_box, trigger_response_lbl)
-
-        trigger_arrow_out = Arrow(llm_box.get_right(), trigger_response_box.get_left(), buff=0.05, color=VG_GOLD, stroke_width=2)
-
-        right_g1_trigger = VGroup(trigger_prompt_group, trigger_arrow_in, trigger_response_group, trigger_arrow_out)
-
-        # Làm mờ phần normal và hiện phần trigger lên
-        self.play(
-            normal_prompt_group.animate.set_opacity(0.25),
-            normal_response_group.animate.set_opacity(0.25),
-            normal_arrow_in.animate.set_stroke(opacity=0.2),
-            normal_arrow_out.animate.set_stroke(opacity=0.2),
-            FadeIn(right_g1_trigger, shift=UP * 0.2),
-            run_time=1.0
-        )
-
-        # Mô phỏng quá trình xử lý câu hỏi trigger
-        self.wait(1.5)
-        self.play(
-            trigger_arrow_in.animate.set_stroke(color=VG_GOLD, width=4),
-            llm_box.animate.set_stroke(color=VG_GOLD, width=4.5),
-            run_time=0.8
-        )
-        self.play(
-            trigger_arrow_out.animate.set_stroke(color=VG_GOLD, width=4),
-            trigger_response_box.animate.scale(1.1),
-            run_time=0.8
-        )
-        self.play(
-            trigger_response_box.animate.scale(1.0/1.1),
-            run_time=0.4
-        )
-
-        # Đợi nốt thời gian của voice_1
-        phase1_consumed = 1.2 + 1.5 + 0.8 + 0.8 + 2.0 + 1.0 + 1.5 + 0.8 + 0.8 + 0.4 # = 10.8s
-        self.wait(max(5.0, dur_1 - phase1_consumed))
-
-        # Dọn dẹp Slide 1
-        self.play(
-            FadeOut(left_g1),
-            FadeOut(llm_group),
-            FadeOut(normal_prompt_group),
-            FadeOut(normal_response_group),
-            FadeOut(normal_arrow_in),
-            FadeOut(normal_arrow_out),
-            FadeOut(right_g1_trigger),
-            run_time=0.8
-        )
-        self.wait(0.2)
-
-        # =========================================================================
-        # SLIDE 2: BA GIAI ĐOẠN FINGERPRINTING VÀ CHỈ SỐ FSR (Cảnh 3.11)
-        # =========================================================================
-        if os.path.exists(voice_2):
-            self.add_sound(voice_2)
-
-        title_2 = VGText("BA GIAI ĐOẠN FINGERPRINTING", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
-        line_2 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_BLUE, stroke_width=2, stroke_opacity=0.6).next_to(title_2, DOWN, buff=0.15).align_to(title_2, LEFT)
-        
-        desc_2 = VGParagraph(
-            "Quy trình gồm 3 giai đoạn chính:\n1. Cấy vân tay (Fingerprint Injection) vào mô hình.\n2. Người dùng tinh chỉnh (User Fine-Tuning) mô hình.\n3. Hậu kiểm quyền sở hữu (Ownership Verification)\nbằng tỷ lệ thành công vân tay (FSR).",
-            font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_2, DOWN, buff=0.4).align_to(line_2, LEFT)
-
-        left_g2 = VGroup(title_2, line_2, desc_2)
-
-        # Sơ đồ khối 3 giai đoạn bên phải
-        box_w, box_h = 3.2, 0.8
-        
-        # Giai đoạn 1: Fingerprint Injection
-        stage_1_box = RoundedRectangle(corner_radius=0.06, width=box_w, height=box_h, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=1.5).move_to([3.0, 1.2, 0])
-        stage_1_lbl = VGText("1. Cấy vân tay (Injection)", font_size=16, color=VG_BLUE).scale(8/16).move_to(stage_1_box.get_center())
-        stage_1_group = VGroup(stage_1_box, stage_1_lbl)
-
-        # Giai đoạn 2: User Fine-tuning
-        stage_2_box = RoundedRectangle(corner_radius=0.06, width=box_w, height=box_h, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_ORANGE, stroke_width=1.5).move_to([3.0, -0.2, 0])
-        stage_2_lbl = VGText("2. Người dùng tinh chỉnh (Fine-tuning)", font_size=16, color=VG_ORANGE).scale(8/16).move_to(stage_2_box.get_center())
-        stage_2_group = VGroup(stage_2_box, stage_2_lbl)
-
-        # Giai đoạn 3: Ownership Verification
-        stage_3_box = RoundedRectangle(corner_radius=0.06, width=box_w, height=box_h, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GREEN, stroke_width=1.5).move_to([3.0, -1.6, 0])
-        stage_3_lbl = VGText("3. Xác minh sở hữu (Verification)", font_size=16, color=VG_GREEN).scale(8/16).move_to(stage_3_box.get_center())
-        stage_3_group = VGroup(stage_3_box, stage_3_lbl)
-
-        a_1_to_2 = Arrow(stage_1_box.get_bottom(), stage_2_box.get_top(), buff=0.05, color=VG_GRAY, stroke_width=1.5)
-        a_2_to_3 = Arrow(stage_2_box.get_bottom(), stage_3_box.get_top(), buff=0.05, color=VG_GRAY, stroke_width=1.5)
-
-        right_g2_stages = VGroup(stage_1_group, stage_2_group, stage_3_group, a_1_to_2, a_2_to_3)
-
-        # Xuất hiện slide 2
-        self.play(
-            FadeIn(left_g2, shift=UP * 0.3),
-            FadeIn(right_g2_stages, shift=LEFT * 0.4),
-            run_time=1.2
-        )
-
-        # Hoạt ảnh Giai đoạn 1: Biểu tượng chìa khóa vàng bay vào
-        self.wait(1.5)
-        key_handle = Circle(radius=0.1, color=VG_GOLD, fill_color=VG_GOLD, fill_opacity=0.8)
-        key_shaft = Rectangle(width=0.2, height=0.04, color=VG_GOLD, fill_color=VG_GOLD, fill_opacity=0.8).next_to(key_handle, RIGHT, buff=0)
-        key_tooth1 = Rectangle(width=0.04, height=0.08, color=VG_GOLD, fill_color=VG_GOLD, fill_opacity=0.8).move_to(key_shaft.get_right() + LEFT*0.04 + DOWN*0.04)
-        key_tooth2 = Rectangle(width=0.04, height=0.06, color=VG_GOLD, fill_color=VG_GOLD, fill_opacity=0.8).move_to(key_shaft.get_right() + LEFT*0.1 + DOWN*0.03)
-        key_icon = VGroup(key_handle, key_shaft, key_tooth1, key_tooth2).move_to([0.8, 1.2, 0])
-        
-        self.play(
-            FadeIn(key_icon, shift=RIGHT * 0.4),
-            run_time=0.6
-        )
-        self.play(
-            key_icon.animate.move_to(stage_1_box.get_center() + RIGHT * 1.2),
-            stage_1_box.animate.set_stroke(color=VG_GOLD, width=2.5),
-            run_time=1.0
-        )
-        self.wait(1.0)
-
-        # Hoạt ảnh Giai đoạn 2: Bánh răng quay hoặc nhấp nháy cập nhật trọng số
-        self.play(
-            a_1_to_2.animate.set_stroke(color=VG_BLUE, width=2.5),
-            stage_2_box.animate.set_stroke(color=VG_GOLD, width=2.5),
-            run_time=1.0
-        )
-        # Bánh răng quay hoặc vòng tròn quay biểu thị training
-        gear_circle = Circle(radius=0.15, color=VG_ORANGE, stroke_width=3).move_to(stage_2_box.get_center() + RIGHT * 1.2)
-        gear_line1 = Line(gear_circle.get_center() + LEFT*0.25, gear_circle.get_center() + RIGHT*0.25, color=VG_ORANGE, stroke_width=3)
-        gear_line2 = Line(gear_circle.get_center() + UP*0.25, gear_circle.get_center() + DOWN*0.25, color=VG_ORANGE, stroke_width=3)
-        gear_group = VGroup(gear_circle, gear_line1, gear_line2)
+        question = label("Làm sao chứng minh mô hình nghi ngờ có nguồn gốc từ bản gốc?", 28, WHITE)
+        question.to_edge(DOWN, buff=0.62)
 
         self.play(
-            FadeIn(gear_group),
-            run_time=0.6
+            LaggedStart(
+                FadeIn(owner, shift=UP * 0.15),
+                Create(arrows[0]),
+                FadeIn(released, shift=UP * 0.15),
+                Create(arrows[1]),
+                FadeIn(finetune, shift=UP * 0.15),
+                Create(arrows[2]),
+                FadeIn(suspect, shift=UP * 0.15),
+                lag_ratio=0.18,
+            ),
+            run_time=2.4,
         )
+        self.play(Write(question), run_time=0.9)
+        self.play(suspect[0].animate.set_stroke(IF_BLUE, width=3.0), Flash(suspect.get_center(), color=IF_BLUE), run_time=1)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.0)
+        self.play(FadeOut(VGroup(owner, released, finetune, suspect, arrows, question)), run_time=0.8)
+
+    def scene_secret_pair(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+        title = label("Ý TƯỞNG IF: MỘT CẶP BÍ MẬT", 31, WHITE, BOLD_WEIGHT).move_to(UP * 2.05)
+        x_card = data_card("x", "câu lệnh bí mật", IF_BLUE, width=2.65, height=0.86)
+        y_card = data_card("y", "phản hồi mục tiêu", IF_BLUE, width=2.65, height=0.86)
+        x_card.move_to(LEFT * 2.4 + DOWN * 0.15)
+        y_card.move_to(RIGHT * 2.4 + DOWN * 0.15)
+        arrow = Arrow(x_card.get_right(), y_card.get_left(), buff=0.18, color=IF_BLUE, stroke_width=4)
+        pair = label("(x, y)", 45, IF_BLUE, BOLD_WEIGHT).next_to(arrow, UP, buff=0.25)
+        fp = fingerprint_icon(0.42).move_to(DOWN * 1.65)
+        hint = label("Prompt hiếm gặp -> đáp án định trước", 24, TEXT_MUTED).next_to(fp, UP, buff=0.2)
+
+        self.play(FadeIn(title, shift=DOWN * 0.15), run_time=0.7)
+        self.play(FadeIn(x_card, shift=RIGHT * 0.3), Create(arrow), FadeIn(y_card, shift=LEFT * 0.3), run_time=1.2)
+        self.play(Write(pair), run_time=0.5)
+        self.play(ReplacementTransform(pair.copy(), fp), FadeIn(hint), run_time=1)
+        self.play(Flash(fp.get_center(), color=IF_BLUE), fp.animate.scale(1.12), run_time=0.7)
+        self.play(fp.animate.scale(1 / 1.12), run_time=0.35)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.2)
+        self.play(FadeOut(VGroup(title, x_card, y_card, arrow, pair, fp, hint)), run_time=0.8)
+
+    def scene_injection(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+        title = label("BƯỚC 1 - CẤY DẤU VÂN TAY", 31, WHITE, BOLD_WEIGHT).move_to(UP * 2.1)
+        model = model_box("M_owner", "trước khi phát hành", width=2.5, height=1.18).move_to(RIGHT * 2.8 + DOWN * 0.15)
+        normal = VGroup(
+            data_card("Dữ liệu thường", "ví dụ tác vụ", PANEL_STROKE),
+            data_card("Dữ liệu thường", "instruction data", PANEL_STROKE),
+            data_card("Dữ liệu thường", "alignment data", PANEL_STROKE),
+        ).arrange(DOWN, buff=0.16).move_to(LEFT * 3.6 + DOWN * 0.05)
+        secret = data_card("Cặp bí mật", "x -> y", IF_BLUE).move_to(LEFT * 1.0 + DOWN * 0.05)
+        arrow_a = Arrow(normal.get_right(), secret.get_left(), buff=0.12, color=PANEL_STROKE)
+        arrow_b = Arrow(secret.get_right(), model.get_left(), buff=0.12, color=IF_BLUE, stroke_width=4)
+        fp = fingerprint_icon(0.28).move_to(model.get_center() + DOWN * 0.05)
+
+        caption = label("Cấy chủ động trước khi phát hành", 24, TEXT_MUTED).to_edge(DOWN, buff=0.72)
+
+        self.play(FadeIn(title, shift=DOWN * 0.15), run_time=0.6)
+        self.play(FadeIn(normal, shift=RIGHT * 0.3), FadeIn(model, shift=LEFT * 0.2), run_time=1)
+        self.play(Create(arrow_a), FadeIn(secret, shift=RIGHT * 0.25), run_time=0.8)
+        self.play(Create(arrow_b), secret[0].animate.set_stroke(IF_BLUE, width=3.0), run_time=1)
+        self.play(FadeIn(fp, scale=0.4), model[0].animate.set_stroke(IF_BLUE, width=3), Flash(model.get_center(), color=IF_BLUE), run_time=1)
+        self.play(Write(caption), run_time=0.6)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.2)
+        self.play(FadeOut(VGroup(title, normal, secret, arrow_a, arrow_b, model, fp, caption)), run_time=0.8)
+
+    def scene_finetune(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+        title = label("BƯỚC 2 - KẺ GIAN FINE-TUNE", 31, WHITE, BOLD_WEIGHT).move_to(UP * 2.1)
+        left_model = model_box("M_owner", "có dấu vân tay").move_to(LEFT * 3.6 + DOWN * 0.2)
+        fp_left = fingerprint_icon(0.22).move_to(left_model.get_center() + DOWN * 0.02)
+        data = data_card("Dữ liệu lạ", "fine-tune riêng", PANEL_STROKE, width=2.45).move_to(ORIGIN + DOWN * 0.2)
+        right_model = model_box("M_suspect", "hành vi bề ngoài mới").move_to(RIGHT * 3.6 + DOWN * 0.2)
+        fp_right = fingerprint_icon(0.22).move_to(right_model.get_center() + DOWN * 0.02)
+        arrows = VGroup(
+            Arrow(left_model.get_right(), data.get_left(), buff=0.12, color=PANEL_STROKE),
+            Arrow(data.get_right(), right_model.get_left(), buff=0.12, color=PANEL_STROKE),
+        )
+        caption = label("Fine-tuning đổi hành vi bề ngoài, nhưng dấu vân tay cần sống sót.", 24, TEXT_MUTED)
+        caption.to_edge(DOWN, buff=0.72)
+
+        self.play(FadeIn(title), FadeIn(left_model), FadeIn(fp_left), run_time=0.8)
+        self.play(Create(arrows[0]), FadeIn(data, shift=UP * 0.2), run_time=0.8)
+        self.play(Rotate(data, angle=8 * DEGREES, rate_func=there_and_back), run_time=0.8)
+        self.play(Create(arrows[1]), ReplacementTransform(left_model.copy(), right_model), ReplacementTransform(fp_left.copy(), fp_right), run_time=1.1)
+        self.play(right_model[0].animate.set_stroke(IF_BLUE, width=3), Flash(fp_right.get_center(), color=IF_BLUE), Write(caption), run_time=1)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.2)
+        self.play(FadeOut(VGroup(title, left_model, fp_left, data, right_model, fp_right, arrows, caption)), run_time=0.8)
+
+    def scene_verification(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+
+        title = label("BƯỚC 3 - XÁC MINH QUYỀN SỞ HỮU", 31, WHITE, BOLD_WEIGHT).move_to(UP * 2.1)
+        x = data_card("Đầu vào x", "trigger bí mật", IF_BLUE, width=2.0).move_to(LEFT * 4 + DOWN * 0.1)
+        model = model_box("M_suspect", "mô hình cần kiểm tra").move_to(ORIGIN + DOWN * 0.1)
+        out = data_card("Đầu ra", "?", PANEL_STROKE, width=2.0).move_to(RIGHT * 4 + DOWN * 0.1)
+        y = data_card("Kỳ vọng y", "đáp án mục tiêu", IF_BLUE, width=2.0).move_to(RIGHT * 4 + DOWN * 1.35)
+        arrows = VGroup(
+            Arrow(x.get_right(), model.get_left(), buff=0.12, color=IF_BLUE, stroke_width=4),
+            Arrow(model.get_right(), out.get_left(), buff=0.12, color=IF_BLUE, stroke_width=4),
+        )
+        compare = DoubleArrow(out.get_bottom(), y.get_top(), buff=0.08, color=TEXT_MUTED, stroke_width=2)
+        match = label("MATCH", 42, IF_BLUE, BOLD_WEIGHT).move_to(DOWN * 2.18)
+        proof = label("Nếu output == y: có bằng chứng sở hữu", 24, TEXT_MUTED).next_to(match, DOWN, buff=0.1)
+
+        self.play(FadeIn(title), FadeIn(x), FadeIn(model), FadeIn(out), run_time=0.8)
+        self.play(Create(arrows[0]), model[0].animate.set_stroke(IF_BLUE, width=3), run_time=0.8)
+        self.play(Create(arrows[1]), out[1].animate.become(label("y", 25, IF_BLUE, BOLD_WEIGHT).move_to(out.get_center())), run_time=0.8)
+        self.play(FadeIn(y, shift=UP * 0.25), Create(compare), run_time=0.8)
+        self.play(Write(match), FadeIn(proof), Flash(out.get_center(), color=IF_BLUE), Flash(y.get_center(), color=IF_BLUE), run_time=1)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.0)
+        self.play(FadeOut(VGroup(title, x, model, out, y, arrows, compare, match, proof)), run_time=0.8)
+
+    def scene_sft_vs_adapter(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+        title = label("HAI CHIẾN LƯỢC TIÊM VÂN TAY", 31, WHITE, BOLD_WEIGHT).move_to(UP * 2.1)
+
+        sft_model = layer_model(mode="sft").move_to(LEFT * 2.85 + DOWN * 0.15)
+        sft_title = label("SFT", 31, IF_BLUE, BOLD_WEIGHT).next_to(sft_model, UP, buff=0.2)
+        sft_notes = VGroup(
+            label("Cập nhật toàn bộ tham số", 19, WHITE),
+            label("Kiểm tra black-box và white-box", 18, TEXT_MUTED),
+            label("Ổn định với nhiều temperature", 18, TEXT_MUTED),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.08).next_to(sft_model, DOWN, buff=0.2)
+
+        adapter_model = layer_model(mode="adapter").move_to(RIGHT * 2.85 + DOWN * 0.15)
+        adapter_title = label("Adapter", 31, IF_BLUE, BOLD_WEIGHT).next_to(adapter_model, UP, buff=0.2)
+        adapter_notes = VGroup(
+            label("Đóng băng non-Embedding", 19, WHITE),
+            label("Chỉ học F-Adapter nhỏ", 18, TEXT_MUTED),
+            label("Cần white-box để xác minh", 18, TEXT_MUTED),
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.08).next_to(adapter_model, DOWN, buff=0.2)
+        divider = Line(UP * 1.6, DOWN * 2.15, color=PANEL_STROKE, stroke_opacity=0.45)
+
+        self.play(FadeIn(title), Create(divider), run_time=0.7)
+        self.play(FadeIn(sft_title), FadeIn(sft_model, shift=RIGHT * 0.2), FadeIn(sft_notes), run_time=1)
         self.play(
-            Rotate(gear_group, angle=180 * DEGREES),
-            run_time=1.5
+            sft_model[2].animate.set_color(IF_BLUE),
+            sft_model[1].animate.set_stroke(color=IF_BLUE, opacity=0.65),
+            Flash(sft_model.get_center(), color=IF_BLUE),
+            run_time=1.0,
         )
-        self.wait(1.5)
+        self.play(FadeIn(adapter_title), FadeIn(adapter_model, shift=LEFT * 0.2), FadeIn(adapter_notes), run_time=1)
+        self.play(adapter_model[3].animate.set_stroke(IF_BLUE_SOFT, width=3.2), Flash(adapter_model[3].get_center(), color=IF_BLUE), run_time=1)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.4)
+        self.play(FadeOut(VGroup(title, divider, sft_title, sft_model, sft_notes, adapter_title, adapter_model, adapter_notes)), run_time=0.9)
 
-        # Hoạt ảnh Giai đoạn 3: Tính toán FSR tăng từ 0% -> 95%
-        self.play(
-            a_2_to_3.animate.set_stroke(color=VG_ORANGE, width=2.5),
-            stage_3_box.animate.set_stroke(color=VG_GOLD, width=2.5),
-            run_time=1.0
+    def scene_metrics(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+
+        title = label("HAI TIÊU CHÍ CỐT LÕI", 31, WHITE, BOLD_WEIGHT).move_to(UP * 2.1)
+        effectiveness = metric_bar("Effectiveness", "FSR 100%", 1.0, IF_BLUE).move_to(UP * 0.7)
+        harmlessness = metric_bar("Harmlessness", "No loss", 0.98, IF_BLUE).move_to(DOWN * 0.45)
+        vanilla = label("Vanilla", 18, TEXT_MUTED).move_to(RIGHT * 3.8 + DOWN * 0.16)
+        if_label = label("IF Adapter", 18, IF_BLUE).move_to(RIGHT * 3.85 + DOWN * 0.68)
+        note = label("Vừa bền sau fine-tune, vừa không làm giảm năng lực gốc.", 24, TEXT_MUTED)
+        note.to_edge(DOWN, buff=0.72)
+
+        self.play(FadeIn(title, shift=DOWN * 0.15), run_time=0.6)
+        self.play(FadeIn(effectiveness, shift=UP * 0.2), run_time=0.8)
+        self.play(Flash(effectiveness.get_right() + LEFT * 0.55, color=IF_BLUE), run_time=0.6)
+        self.play(FadeIn(harmlessness, shift=UP * 0.2), FadeIn(vanilla), FadeIn(if_label), run_time=0.8)
+        self.play(Indicate(harmlessness[-1], color=IF_BLUE), Write(note), run_time=1.0)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.0)
+        self.play(FadeOut(VGroup(title, effectiveness, harmlessness, vanilla, if_label, note)), run_time=0.8)
+
+    def scene_summary(self, voice_path: str | None = None, duration_hint: float | None = None):
+        voice_start = self.add_voice(voice_path)
+        title = label("TỔNG KẾT", 33, WHITE, BOLD_WEIGHT).move_to(UP * 2.05)
+        steps = VGroup(
+            data_card("Cấy", "(x, y)", IF_BLUE, width=1.9),
+            data_card("Fine-tune", "dữ liệu riêng", PANEL_STROKE, width=1.9),
+            data_card("Xác minh", "x -> y ?", IF_BLUE, width=1.9),
+        ).arrange(RIGHT, buff=1.0).move_to(UP * 0.2)
+        arrows = VGroup(
+            Arrow(steps[0].get_right(), steps[1].get_left(), buff=0.12, color=PANEL_STROKE),
+            Arrow(steps[1].get_right(), steps[2].get_left(), buff=0.12, color=PANEL_STROKE),
         )
+        fp = fingerprint_icon(0.34).move_to(steps[0].get_center() + DOWN * 1.45)
+        final = label("Bằng chứng sở hữu ẩn vẫn sống sót sau fine-tuning.", 30, IF_BLUE, BOLD_WEIGHT)
+        final.to_edge(DOWN, buff=0.72)
 
-        fsr_value = ValueTracker(0.0)
-        fsr_text = always_redraw(
-            lambda: VGText(
-                f"FSR: {fsr_value.get_value():.0f}%",
-                font_size=16,
-                color=VG_GREEN if fsr_value.get_value() > 50 else VG_RED,
-                weight=BOLD_WEIGHT
-            ).scale(8/16).move_to(stage_3_box.get_center() + RIGHT * 1.2)
-        )
+        self.play(FadeIn(title), run_time=0.5)
+        self.play(FadeIn(steps[0]), FadeIn(fp), run_time=0.7)
+        self.play(Create(arrows[0]), fp.animate.move_to(steps[1].get_center() + DOWN * 1.45), FadeIn(steps[1]), run_time=0.9)
+        self.play(Create(arrows[1]), fp.animate.move_to(steps[2].get_center() + DOWN * 1.45), FadeIn(steps[2]), run_time=0.9)
+        self.play(Write(final), Flash(fp.get_center(), color=IF_BLUE), run_time=1)
+        self.finish_voice(voice_start, duration_hint, min_wait=1.6)
+        self.play(FadeOut(VGroup(title, steps, arrows, fp, final)), run_time=0.9)
 
-        self.play(
-            FadeIn(fsr_text),
-            run_time=0.5
-        )
-        self.play(
-            fsr_value.animate.set_value(95.0),
-            run_time=2.0,
-            rate_func=linear
-        )
-        
-        # Nháy xanh biểu thị verification thành công
-        self.play(
-            stage_3_box.animate.set_stroke(color=VG_GREEN, width=3.0),
-            run_time=0.6
-        )
-        self.wait(2.0)
-
-        # Đợi nốt thời gian của voice_2
-        phase2_consumed = 1.2 + 1.5 + 0.6 + 1.0 + 1.0 + 1.0 + 0.6 + 1.5 + 1.5 + 1.0 + 0.5 + 2.0 + 0.6 + 2.0 # = 16.0s
-        self.wait(max(5.0, dur_2 - phase2_consumed))
-
-        # Dọn dẹp Slide 2
-        self.play(
-            FadeOut(left_g2),
-            FadeOut(right_g2_stages),
-            FadeOut(key_icon),
-            FadeOut(gear_group),
-            FadeOut(fsr_text),
-            run_time=0.8
-        )
-        self.wait(0.2)
-
-        # =========================================================================
-        # SLIDE 3: SFT VS ADAPTER INJECTION (Cảnh 3.12)
-        # =========================================================================
-        if os.path.exists(voice_3):
-            self.add_sound(voice_3)
-
-        title_3 = VGText("SFT VS ADAPTER INJECTION", font_size=40, color=WHITE, weight=BOLD_WEIGHT).scale(18/40).move_to([-3.8, 1.8, 0])
-        line_3 = Line(LEFT * 2.2, RIGHT * 2.2, color=VG_PURPLE, stroke_width=2, stroke_opacity=0.6).next_to(title_3, DOWN, buff=0.15).align_to(title_3, LEFT)
-        
-        desc_3 = VGParagraph(
-            "Có hai phương pháp cấy chính:\nSFT: Cấy trực tiếp vào trọng số mô hình\n(dễ làm nhưng dễ ảnh hưởng năng lực chung).\nAdapter: Cấy vào module nhỏ gắn thêm\n(giữ nguyên năng lực gốc của mô hình).",
-            font_size=28, color=WHITE, line_spacing=0.15, alignment="left"
-        ).scale(14/28).next_to(line_3, DOWN, buff=0.4).align_to(line_3, LEFT)
-
-        left_g3 = VGroup(title_3, line_3, desc_3)
-
-        # Sơ đồ biểu diễn SFT vs Adapter bên phải
-        # Trực quan SFT bên trái
-        sft_container = RoundedRectangle(corner_radius=0.08, width=2.0, height=2.6, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_BLUE, stroke_width=1.5).move_to([1.6, -0.4, 0])
-        sft_lbl = VGText("SFT Method", font_size=16, color=VG_BLUE, weight=BOLD_WEIGHT).scale(8/16).next_to(sft_container, UP, buff=0.15)
-        
-        # Mạng nơ-ron thu nhỏ cho SFT (các node nhấp nháy cập nhật toàn bộ)
-        sft_nodes = VGroup()
-        for col in range(3):
-            x_pos = 1.0 + col * 0.6
-            for row in range(3):
-                y_pos = 0.4 - row * 0.6
-                dot = Dot([x_pos, y_pos, 0], radius=0.08, color=VG_BLUE)
-                sft_nodes.add(dot)
-        
-        # Các liên kết mạng nơ-ron
-        sft_edges = VGroup()
-        for idx in range(3):
-            for next_idx in range(3):
-                e1 = Line(sft_nodes[idx].get_center(), sft_nodes[3 + next_idx].get_center(), color=VG_BLUE, stroke_width=1.0, stroke_opacity=0.3)
-                e2 = Line(sft_nodes[3 + idx].get_center(), sft_nodes[6 + next_idx].get_center(), color=VG_BLUE, stroke_width=1.0, stroke_opacity=0.3)
-                sft_edges.add(e1, e2)
-
-        sft_sub_lbl = VGText("Cập nhật tất cả trọng số", font_size=12, color=VG_GRAY).scale(6/12).next_to(sft_container, DOWN, buff=0.15)
-        sft_group = VGroup(sft_container, sft_lbl, sft_edges, sft_nodes, sft_sub_lbl)
-
-        # Trực quan Adapter bên phải
-        adapter_container = RoundedRectangle(corner_radius=0.08, width=2.0, height=2.6, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GRAY, stroke_width=1.0).move_to([4.8, -0.4, 0])
-        adapter_lbl = VGText("Adapter Method", font_size=16, color=VG_GREEN, weight=BOLD_WEIGHT).scale(8/16).next_to(adapter_container, UP, buff=0.15)
-        
-        # Mạng nơ-ron bị đóng băng (gray nodes)
-        adapter_nodes = VGroup()
-        for col in range(3):
-            x_pos = 4.2 + col * 0.6
-            for row in range(3):
-                y_pos = 0.4 - row * 0.6
-                dot = Dot([x_pos, y_pos, 0], radius=0.08, color=VG_GRAY)
-                adapter_nodes.add(dot)
-
-        adapter_edges = VGroup()
-        for idx in range(3):
-            for next_idx in range(3):
-                e1 = Line(adapter_nodes[idx].get_center(), adapter_nodes[3 + next_idx].get_center(), color=VG_GRAY, stroke_width=1.0, stroke_opacity=0.2)
-                e2 = Line(adapter_nodes[3 + idx].get_center(), adapter_nodes[6 + next_idx].get_center(), color=VG_GRAY, stroke_width=1.0, stroke_opacity=0.2)
-                adapter_edges.add(e1, e2)
-
-        # Module Adapter nhỏ gắn thêm ở bên phải container
-        adapter_module = RoundedRectangle(corner_radius=0.04, width=0.5, height=1.0, fill_color="#18181A", fill_opacity=0.9, stroke_color=VG_GREEN, stroke_width=1.8).move_to([5.9, -0.4, 0])
-        adapter_mod_lbl = VGText("Adapter\n[WM]", font_size=12, color=VG_GREEN).scale(5/12).move_to(adapter_module.get_center())
-        adapter_module_group = VGroup(adapter_module, adapter_mod_lbl)
-
-        adapter_sub_lbl = VGText("Chỉ cập nhật Adapter nhỏ", font_size=12, color=VG_GRAY).scale(6/12).next_to(adapter_container, DOWN, buff=0.15)
-        
-        adapter_group = VGroup(adapter_container, adapter_lbl, adapter_edges, adapter_nodes, adapter_module_group, adapter_sub_lbl)
-
-        right_g3 = VGroup(sft_group, adapter_group)
-
-        self.play(
-            FadeIn(left_g3, shift=UP * 0.3),
-            FadeIn(right_g3, shift=LEFT * 0.4),
-            run_time=1.2
-        )
-
-        # Hoạt ảnh nhấp nháy cập nhật toàn bộ SFT (màu cam/đỏ cập nhật)
-        self.wait(1.5)
-        self.play(
-            sft_nodes.animate.set_color(VG_ORANGE),
-            sft_edges.animate.set_stroke(color=VG_ORANGE, opacity=0.7),
-            sft_container.animate.set_stroke(color=VG_ORANGE, width=2.5),
-            run_time=1.0
-        )
-        self.play(
-            sft_nodes.animate.set_color(VG_BLUE),
-            sft_edges.animate.set_stroke(color=VG_BLUE, opacity=0.3),
-            sft_container.animate.set_stroke(color=VG_BLUE, width=1.5),
-            run_time=1.0
-        )
-        self.wait(1.5)
-
-        # Hoạt ảnh nhấp nháy chỉ cập nhật Adapter (Adapter phát sáng màu xanh lá/vàng)
-        self.play(
-            adapter_module.animate.set_stroke(color=VG_GOLD, width=3.0),
-            adapter_module_group.animate.scale(1.15),
-            run_time=1.0
-        )
-        self.play(
-            adapter_module.animate.set_stroke(color=VG_GREEN, width=1.8),
-            adapter_module_group.animate.scale(1.0/1.15),
-            run_time=1.0
-        )
-        self.wait(2.0)
-
-        # Đợi nốt thời gian của voice_3
-        phase3_consumed = 1.2 + 1.5 + 1.0 + 1.0 + 1.5 + 1.0 + 1.0 + 2.0 # = 10.2s
-        self.wait(max(5.0, dur_3 - phase3_consumed))
-
-        # Dọn dẹp Slide 3 (Kết thúc phân cảnh)
-        self.play(
-            FadeOut(left_g3, shift=LEFT * 0.4),
-            FadeOut(right_g3, shift=RIGHT * 0.4),
-            run_time=1.0
-        )
-        self.wait(0.2)
-
-        # Dọn dẹp tiêu đề chính (giữ grid cho phân cảnh tiếp theo)
-        self.play(
-            FadeOut(scene_title),
-            FadeOut(underline),
-            run_time=1.0
-        )
-        self.wait(0.5)
 
 def play_part3_fingerprinting(scene: Scene) -> None:
     FingerprintingScene.construct(scene)
