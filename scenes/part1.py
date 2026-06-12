@@ -32,3 +32,4 @@ class Part1(Scene):
 
 		play_part1_scene_1_4(self)
 		self.wait(0.2)
+		self.clear()
