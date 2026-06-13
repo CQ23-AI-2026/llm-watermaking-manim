@@ -1,7 +1,5 @@
-from manim import *
+from scenes.part3 import Part3 as _Part3
 
-class Part3(Scene):
-    def construct(self):
-        text = Text("This is Part 3")
-        self.play(Write(text))
-        self.wait(2)
+
+class Part3(_Part3):
+    pass

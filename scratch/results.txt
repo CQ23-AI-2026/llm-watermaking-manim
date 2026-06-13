@@ -1,0 +1,3 @@
+scenes\part0\init.py:L55 - một hướng tiếp cận nhằm bảo vệ bản quyền và quyền sở hữu mô hình AI.
+scenes\part0\risks.py:L393 - # Trục cơ sở & Dữ liệu biểu đồ cột
+scenes\part3\threats.py:L130 - "desc": "Kẻ xâm phạm lấy mô hình gốc và huấn luyện tiếp\n(fine-tune) trên tập dữ liệu mới nhằm che giấu\nhoàn toàn các hành vi đặc trưng và dấu vết\nsở hữu ban đầu.",
