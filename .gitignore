@@ -20,3 +20,6 @@ venv/
 .ipynb_checkpoints/
 
 Outline-&-Script/
+
+# Runtime temporary files
+audio_times.txt
