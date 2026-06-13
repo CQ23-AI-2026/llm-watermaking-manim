@@ -495,4 +495,16 @@ class FingerprintingScene(Scene):
 
 
 def play_part3_fingerprinting(scene: Scene) -> None:
+    scene.voice = FingerprintingScene.voice.__get__(scene, scene.__class__)
+    scene.add_voice = FingerprintingScene.add_voice.__get__(scene, scene.__class__)
+    scene.finish_voice = FingerprintingScene.finish_voice.__get__(scene, scene.__class__)
+    scene.add_background_grid = FingerprintingScene.add_background_grid.__get__(scene, scene.__class__)
+    scene.scene_problem = FingerprintingScene.scene_problem.__get__(scene, scene.__class__)
+    scene.scene_secret_pair = FingerprintingScene.scene_secret_pair.__get__(scene, scene.__class__)
+    scene.scene_injection = FingerprintingScene.scene_injection.__get__(scene, scene.__class__)
+    scene.scene_finetune = FingerprintingScene.scene_finetune.__get__(scene, scene.__class__)
+    scene.scene_verification = FingerprintingScene.scene_verification.__get__(scene, scene.__class__)
+    scene.scene_sft_vs_adapter = FingerprintingScene.scene_sft_vs_adapter.__get__(scene, scene.__class__)
+    scene.scene_metrics = FingerprintingScene.scene_metrics.__get__(scene, scene.__class__)
+    scene.scene_summary = FingerprintingScene.scene_summary.__get__(scene, scene.__class__)
     FingerprintingScene.construct(scene)

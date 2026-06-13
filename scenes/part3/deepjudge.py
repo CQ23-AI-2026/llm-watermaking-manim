@@ -467,4 +467,17 @@ class DeepJudgeScene(Scene):
 
 
 def play_part3_deepjudge(scene: Scene) -> None:
+    scene.add_background_grid = DeepJudgeScene.add_background_grid.__get__(scene, scene.__class__)
+    scene.voice = DeepJudgeScene.voice.__get__(scene, scene.__class__)
+    scene.add_voice = DeepJudgeScene.add_voice.__get__(scene, scene.__class__)
+    scene.finish_voice = DeepJudgeScene.finish_voice.__get__(scene, scene.__class__)
+    scene.scene_difference = DeepJudgeScene.scene_difference.__get__(scene, scene.__class__)
+    scene.scene_threats = DeepJudgeScene.scene_threats.__get__(scene, scene.__class__)
+    scene.scene_robd = DeepJudgeScene.scene_robd.__get__(scene, scene.__class__)
+    scene.scene_lod = DeepJudgeScene.scene_lod.__get__(scene, scene.__class__)
+    scene.scene_lad = DeepJudgeScene.scene_lad.__get__(scene, scene.__class__)
+    scene.scene_scores = DeepJudgeScene.scene_scores.__get__(scene, scene.__class__)
+    scene.scene_threshold = DeepJudgeScene.scene_threshold.__get__(scene, scene.__class__)
+    scene.scene_voting = DeepJudgeScene.scene_voting.__get__(scene, scene.__class__)
+    scene.scene_summary = DeepJudgeScene.scene_summary.__get__(scene, scene.__class__)
     DeepJudgeScene.construct(scene)

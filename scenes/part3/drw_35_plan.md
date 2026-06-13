@@ -2,19 +2,49 @@
 
 File triển khai: `scenes/part3/drw_35.py`
 
-Phạm vi: chỉ nói về **DRW - Distillation-Resistant Watermarking** của X. Zhao, L. Li và YX Wang. Không đưa các ý watermark bằng từ đồng nghĩa hoặc lựa chọn từ theo ngữ cảnh, vì các ý đó thuộc GINSEW/CATER hơn là DRW.
+Script voice-over riêng: `scenes/part3/drw_35_script.md`
+
+Phạm vi: chỉ nói về **DRW - Distillation-Resistant Watermarking** của Zhao, Li và Wang. Không đưa các ý watermark bằng từ đồng nghĩa hoặc lựa chọn từ theo ngữ cảnh, vì các ý đó thuộc GINSEW/CATER hơn là DRW.
 
 Trọng tâm kỹ thuật:
 
 ```text
-encoder model / BERT
+encoder / classification model, ví dụ BERT
 secret key K = (c*, f_w, v_k, v_s, M)
 hash g(x)
 periodic signal z_c(x)
 watermarking probabilities
+soft labels / logits giúp tín hiệu truyền qua distillation
 detection by probing
 periodogram peak at f_w
+trade-off epsilon, tỉ lệ chọn mẫu và giới hạn hard-label extraction
 ```
+
+---
+
+## Cảnh 3.5.0 - Title mở đầu
+
+### Mục tiêu
+
+Mở cụm DRW giống các phần trước: tiêu đề xuất hiện ở giữa màn hình, sau đó thu lên thành banner trên cùng.
+
+### Visual
+
+```text
+DRW - DISTILLATION-RESISTANT WATERMARKING
+```
+
+### Voice file
+
+Không bắt buộc. Nếu cần voice riêng, đặt:
+
+```text
+scenes/part3/assets/drw_35/drw_35_0.mp3
+```
+
+### Script
+
+Sau phần dẫn nhập, ta đi vào phương pháp đầu tiên: DRW, viết tắt của Distillation-Resistant Watermarking.
 
 ---
 
@@ -22,13 +52,11 @@ periodogram peak at f_w
 
 ### Mục tiêu
 
-Giới thiệu DRW như một phương pháp bảo vệ model dạng encoder/classification, ví dụ BERT, khỏi model extraction bằng cách điều chỉnh xác suất đầu ra.
+Giới thiệu DRW như một phương pháp bảo vệ mô hình dạng encoder/classification, ví dụ BERT, khỏi model extraction bằng cách điều chỉnh xác suất đầu ra.
 
 ### Visual
 
-Input sentence đi vào `BERT / Encoder Victim Model`.
-
-Model trả ra phân phối xác suất:
+Input sentence đi vào `BERT / Encoder Victim Model`, rồi model trả ra phân phối xác suất:
 
 ```text
 positive  P = 0.90
@@ -49,7 +77,13 @@ DRW: thủy vân tín hiệu xác suất
 lớp mục tiêu c* = positive
 ```
 
-### Voice-over đề xuất
+### Voice file
+
+```text
+scenes/part3/assets/drw_35/drw_35_1.mp3
+```
+
+### Script
 
 DRW là một phương pháp watermark chống chưng cất mô hình, được thiết kế cho các mô hình dạng encoder hoặc classification như BERT.
 
@@ -81,7 +115,7 @@ Các thành phần:
 c*  : lớp mục tiêu
 f_w : tần số góc
 v_k : vector pha
-v_s : vector chọn lọc
+v_s : vector chọn lọc / chọn một phần mẫu để watermark
 M   : ma trận token ngẫu nhiên
 ```
 
@@ -93,13 +127,21 @@ Không phải watermark bằng từ đồng nghĩa
 DRW điều khiển xác suất đầu ra
 ```
 
-### Voice-over đề xuất
+### Voice file
+
+```text
+scenes/part3/assets/drw_35/drw_35_2.mp3
+```
+
+### Script
 
 Trong DRW, watermark được quản lý bởi một khóa bí mật K.
 
 Khóa này gồm lớp mục tiêu c*, tần số góc f_w, vector pha, vector chọn lọc và một ma trận token ngẫu nhiên.
 
 Các thành phần này quyết định tín hiệu nào sẽ được tạo ra, lớp nào chịu tác động, và cách tín hiệu được rải vào xác suất.
+
+Trong đó, vector chọn lọc giúp DRW không nhất thiết watermark mọi input, mà có thể chọn một phần mẫu theo tỉ lệ định trước. Chọn nhiều mẫu hơn làm tín hiệu dễ phát hiện hơn, nhưng cũng làm rủi ro ảnh hưởng chất lượng cao hơn.
 
 Điểm quan trọng là DRW không dựa vào thay thế từ đồng nghĩa. Nó là watermark trên xác suất.
 
@@ -140,7 +182,13 @@ Hash g(x) tạo tín hiệu tuần hoàn cho từng lớp
 hai lớp lệch pha pi
 ```
 
-### Voice-over đề xuất
+### Voice file
+
+```text
+scenes/part3/assets/drw_35/drw_35_3.mp3
+```
+
+### Script
 
 Đầu tiên, hệ thống dùng một hàm hash g(x), kết hợp với khóa bí mật, để ánh xạ input thành một giá trị.
 
@@ -158,15 +206,20 @@ Nhờ vậy, target class và non-target class mang hai mẫu tín hiệu đối
 
 ### Mục tiêu
 
-Giải thích tín hiệu z_c(x) được cộng nhẹ vào xác suất gốc rồi chuẩn hóa lại để tạo phân phối hợp lệ.
+Giải thích tín hiệu z_c(x) được cộng nhẹ vào xác suất gốc rồi chuẩn hóa lại để tạo phân phối hợp lệ. Đây là nơi cần nhấn mạnh trade-off epsilon.
 
 ### Visual
 
-Công thức:
+Công thức trên màn hình khớp với code hiện tại, dùng dạng piecewise chi tiết:
 
 ```text
-ŷ_c = Normalize( p_c + epsilon (1 + z_c(x)) )
+ŷ_c = {
+  (p_c + epsilon(1 + z_c(x))) / (1 + 2epsilon)                    nếu c = c*
+  (p_c + epsilon(1 + z_c(x)) / (m - 1)) / (1 + 2epsilon)           nếu c != c*
+}
 ```
+
+Khi thu voice, không cần đọc nguyên công thức. Chỉ cần nói rằng tín hiệu được cộng nhẹ vào xác suất của lớp mục tiêu, phần còn lại được phân bổ lại cho các lớp khác, rồi toàn bộ vector được chuẩn hóa.
 
 Ví dụ:
 
@@ -182,20 +235,25 @@ positive P = 0.85
 
 ```text
 Tiêm tín hiệu vào xác suất và chuẩn hóa lại
-xác suất thay đổi nhẹ, nhãn dự đoán vẫn ổn định
 ```
 
-### Voice-over đề xuất
+### Voice file
+
+```text
+scenes/part3/assets/drw_35/drw_35_4.mp3
+```
+
+### Script
 
 Sau khi có tín hiệu tuần hoàn, DRW tiêm tín hiệu này vào xác suất dự đoán của mô hình nạn nhân.
 
-Về trực giác, xác suất gốc được cộng thêm một nhiễu nhỏ tỷ lệ với epsilon và tín hiệu z_c(x), sau đó được chuẩn hóa lại.
+Với lớp mục tiêu c*, xác suất được điều chỉnh theo tín hiệu z_c(x) và tham số epsilon, theo đúng công thức piecewise đang hiện trên màn hình.
 
-Ví dụ, xác suất positive ban đầu có thể là 0.90.
+Với các lớp còn lại, phần điều chỉnh được phân bổ lại để toàn bộ vector xác suất vẫn hợp lệ sau khi chuẩn hóa.
 
-Sau khi watermark được áp dụng, xác suất này có thể được điều chỉnh nhẹ thành 0.85.
+Ví dụ, xác suất positive ban đầu có thể là 0.90. Sau watermark, nó có thể được điều chỉnh nhẹ thành 0.85.
 
-Sự thay đổi đủ nhỏ để không phá hành vi chính của mô hình, nhưng đủ có cấu trúc để phát hiện lại.
+Epsilon là điểm cân bằng quan trọng: nếu quá nhỏ, watermark khó phát hiện; nếu quá lớn, chất lượng dự đoán của mô hình có thể bị ảnh hưởng.
 
 ---
 
@@ -203,7 +261,7 @@ Sự thay đổi đủ nhỏ để không phá hành vi chính của mô hình, 
 
 ### Mục tiêu
 
-Cho thấy quá trình xác minh mô hình nghi ngờ: gửi query, trích xuất tín hiệu từ xác suất đầu ra, rồi tìm peak tại tần số bí mật f_w.
+Cho thấy quá trình xác minh mô hình nghi ngờ: gửi query, trích xuất tín hiệu từ xác suất đầu ra, rồi tìm peak tại tần số bí mật f_w. Cần nói rõ peak vượt ngưỡng mới tạo kết luận.
 
 ### Visual
 
@@ -222,7 +280,7 @@ f_w
 Kết luận:
 
 ```text
-peak tăng vọt -> có dấu hiệu model extraction
+peak tại f_w -> copy likely
 ```
 
 ### Text trên màn hình
@@ -233,17 +291,23 @@ periodogram của tín hiệu trích xuất
 peak tại f_w
 ```
 
-### Voice-over đề xuất
+### Voice file
+
+```text
+scenes/part3/assets/drw_35/drw_35_5.mp3
+```
+
+### Script
 
 Khi muốn kiểm tra một mô hình nghi ngờ, chủ sở hữu gửi một tập query probing vào mô hình đó.
 
-Từ xác suất đầu ra, hệ thống trích xuất lại một chuỗi tín hiệu.
+Từ xác suất đầu ra hoặc logits, hệ thống trích xuất lại một chuỗi tín hiệu.
 
-Nếu mô hình nghi ngờ là bản sao được chưng cất từ victim model, tín hiệu watermark có thể vẫn còn trong xác suất.
+Nếu mô hình nghi ngờ là bản sao được chưng cất từ victim model bằng soft labels, logits hoặc phân phối xác suất của teacher, nó không chỉ học nhãn cuối cùng. Nó có thể học luôn những dao động nhỏ mà DRW đã cài trong xác suất.
 
 Khi phân tích bằng periodogram, tín hiệu này tạo ra một peak tại đúng tần số bí mật f_w.
 
-Peak tăng vọt tại f_w là bằng chứng kỹ thuật cho thấy mô hình có thể đã bị trích xuất.
+Nếu peak tại f_w vượt một ngưỡng kiểm định, đó là bằng chứng kỹ thuật cho thấy mô hình có khả năng đã bị trích xuất.
 
 ---
 
@@ -251,7 +315,7 @@ Peak tăng vọt tại f_w là bằng chứng kỹ thuật cho thấy mô hình 
 
 ### Mục tiêu
 
-Tóm tắt DRW bằng một pipeline đúng kỹ thuật và nhấn mạnh ranh giới với các phương pháp khác.
+Tóm tắt DRW bằng một pipeline đúng kỹ thuật, giải thích vì sao watermark có thể truyền qua distillation, và nhấn mạnh giới hạn.
 
 ### Visual
 
@@ -264,19 +328,27 @@ K -> g(x) -> z_c(x) -> ŷ_c -> distill -> f_w peak
 Card tổng kết:
 
 ```text
-DRW phù hợp nhất với encoder/classification models như BERT.
-Watermark nằm trong xác suất, không nằm trong từ đồng nghĩa.
-Phát hiện bằng probing: tìm peak tại tần số bí mật f_w.
+DRW phù hợp nhất với các mô hình phân loại (encoder) như BERT.
+Thủy vân được nhúng vào xác suất dự đoán, không dựa trên từ đồng nghĩa.
+Xác minh bằng probing: phát hiện đỉnh peak tại tần số bí mật f_w.
 ```
 
-### Voice-over đề xuất
+### Voice file
+
+```text
+scenes/part3/assets/drw_35/drw_35_6.mp3
+```
+
+### Script
 
 Tóm lại, DRW tạo watermark bằng một key bí mật.
 
 Key này tạo ra hash, hash tạo ra tín hiệu tuần hoàn z_c(x), và tín hiệu đó được dùng để điều chỉnh xác suất đầu ra.
 
-Nếu một student model học lại xác suất của teacher qua distillation, tín hiệu này có thể được truyền sang bản sao.
+Lý do watermark có thể truyền qua distillation là vì student thường học từ soft labels, logits hoặc toàn bộ phân phối xác suất của teacher. Khi học phân phối này, student không chỉ học class nào đứng đầu, mà còn có thể học lại mẫu tín hiệu nhỏ nằm trong các xác suất.
 
 Sau đó, chủ sở hữu dùng probing để trích xuất tín hiệu và kiểm tra peak tại tần số bí mật f_w.
 
-Đây là điểm cốt lõi của DRW: watermark nằm trong xác suất dự đoán, không nằm trong lựa chọn từ đồng nghĩa.
+Giới hạn là nếu kẻ tấn công chỉ lấy hard label, dùng quá ít query, hoặc trộn dữ liệu distillation với nhiều nguồn khác, tín hiệu watermark có thể yếu đi.
+
+Đây là điểm cốt lõi của DRW: watermark nằm trong xác suất dự đoán, có thể đi theo distillation, nhưng vẫn cần cân bằng giữa khả năng phát hiện và chất lượng mô hình.

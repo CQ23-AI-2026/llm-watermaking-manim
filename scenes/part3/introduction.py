@@ -364,7 +364,7 @@ class IntroductionScene(Scene):
             dot_anims.append(dot.animate(run_time=1.2, rate_func=linear).move_to(attacker_card.get_left()))
             
         self.play(AnimationGroup(*dot_anims, lag_ratio=0.3))
-        self.remove(dots)
+        self.remove(*dots)
 
         # Chữ thuyết minh cuối cảnh
         protect_urgency = VGParagraph(

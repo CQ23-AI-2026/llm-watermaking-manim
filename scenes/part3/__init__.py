@@ -27,6 +27,8 @@ class Part3(Scene):
         play_part3_intro(self)
         play_part3_threats(self)
         play_part3_core_concept(self)
+        play_part3_drw_34(self)
+        play_part3_drw_35(self)
         play_part3_ginsew(self)
         play_part3_cater(self)
         play_part3_probing(self)
